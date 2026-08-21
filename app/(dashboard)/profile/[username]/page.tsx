@@ -475,7 +475,7 @@ function GameImage({ src, alt, className = "" }: { src: string; alt: string; cla
       </div>
     );
   }
-  return <Image src={src} alt={alt} onError={() => setFailed(true)} className={`h-full w-full object-cover ${className}`} />;
+  return <Image src={src} alt={alt} width={800} height={450} onError={() => setFailed(true)} className={`h-full w-full object-cover ${className}`} />;
 }
 
 function formatNumber(value: number) {

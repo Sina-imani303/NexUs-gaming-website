@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { FiBell, FiChevronLeft, FiHeadphones, FiHome, FiMenu, FiPlay, FiSettings, FiUser, FiUsers, FiX } from "react-icons/fi";
+import { FiBell, FiChevronLeft, FiHeadphones, FiHome, FiLogOut, FiMenu, FiPlay, FiSettings, FiUser, FiUsers, FiX } from "react-icons/fi";
 
 const navigation = [
   {
@@ -61,7 +61,7 @@ export default function DashboardLayout({
 
       <div className="pointer-events-none fixed -left-40 -top-40 z-0 h-100 w-100 rounded-full bg-primary/5 blur-[160px]" />
 
-      <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-background/80 px-3 backdrop-blur-2xl sm:px-4 lg:hidden">
+      <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-background/80 px-3 backdrop-blur-2xl lg:hidden">
         <button
           type="button"
           onClick={() => setMobileMenuOpen(true)}
@@ -71,9 +71,20 @@ export default function DashboardLayout({
           <FiMenu size={21} />
         </button>
 
-        <Link href="/" className="text-base font-black tracking-[3px] text-primary sm:text-lg sm:tracking-[4px]">
-          NΞXUS
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/" className="text-base font-black tracking-[3px] text-primary sm:text-lg sm:tracking-[4px]">
+            NΞXUS
+          </Link>
+
+          <Link
+            href="/"
+            aria-label="خروج از داشبورد"
+            title="خروج از داشبورد"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/15 bg-red-500/5 text-red-400 transition-all hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-300"
+          >
+            <FiLogOut size={17} />
+          </Link>
+        </div>
 
         <Link
           href="/notifications"
@@ -87,15 +98,26 @@ export default function DashboardLayout({
 
       <aside className="fixed inset-y-0 right-0 z-40 hidden w-64 border-l border-border bg-background/70 backdrop-blur-2xl lg:block xl:w-72">
         <div className="flex h-full flex-col p-4 xl:p-5">
-          <Link href="/" className="mb-8 flex items-center gap-3 px-2 xl:mb-10 xl:px-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary shadow-[0_0_30px_rgba(212,175,55,.15)] xl:h-14 xl:w-14">
-              <Image src="/logo/logo.jpg" width={56} height={56} alt="NexUs logo" className="h-full w-full object-cover" />
-            </div>
+          <div className="mb-8 flex items-center gap-3 px-2 xl:mb-10 xl:px-3">
+            <Link href="/" className="flex min-w-0 flex-1 items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary shadow-[0_0_30px_rgba(212,175,55,.15)] xl:h-14 xl:w-14">
+                <Image src="/logo/logo.jpg" width={56} height={56} alt="NexUs logo" className="h-full w-full object-cover" />
+              </div>
 
-            <div className="min-w-0">
-              <div className="truncate text-lg font-black tracking-[2px] text-foreground xl:text-xl xl:tracking-[3px]">NΞXUS</div>
-            </div>
-          </Link>
+              <div className="min-w-0">
+                <div className="truncate text-lg font-black tracking-[2px] text-foreground xl:text-xl xl:tracking-[3px]">NΞXUS</div>
+              </div>
+            </Link>
+
+            <Link
+              href="/"
+              aria-label="خروج از داشبورد"
+              title="خروج از داشبورد"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-red-500/15 bg-red-500/5 text-red-400 transition-all duration-300 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-300 xl:h-11 xl:w-11"
+            >
+              <FiLogOut size={18} />
+            </Link>
+          </div>
 
           <div className="mb-5 rounded-2xl border border-border bg-surface/50 p-3 xl:mb-6">
             <div className="flex items-center gap-3">
@@ -173,9 +195,21 @@ export default function DashboardLayout({
 
           <aside className="absolute inset-y-0 right-0 flex w-[88%] max-w-sm flex-col border-l border-border bg-background p-4 shadow-2xl sm:w-[80%] sm:p-5">
             <div className="mb-6 flex items-center justify-between sm:mb-8">
-              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="text-lg font-black tracking-[3px] text-primary sm:text-xl sm:tracking-[4px]">
-                NΞXUS
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link href="/" onClick={() => setMobileMenuOpen(false)} className="text-lg font-black tracking-[3px] text-primary sm:text-xl sm:tracking-[4px]">
+                  NΞXUS
+                </Link>
+
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="خروج از داشبورد"
+                  title="خروج از داشبورد"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/15 bg-red-500/5 text-red-400 transition-all hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-300"
+                >
+                  <FiLogOut size={17} />
+                </Link>
+              </div>
 
               <button
                 type="button"
@@ -196,7 +230,7 @@ export default function DashboardLayout({
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-foreground sm:text-base">Sina</p>
+                  <p className="truncate text-sm font-semibold text-foreground sm:text-base">jaki</p>
 
                   <p className="mt-1 truncate text-xs text-muted">Level 8 • Online</p>
                 </div>

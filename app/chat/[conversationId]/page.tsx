@@ -113,6 +113,34 @@ const initialMessages: Message[] = [
   },
 ];
 
+function getEnglishTime() {
+  const now = new Date();
+
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+
+  const englishDigits: Record<string, string> = {
+    "۰": "0",
+    "۱": "1",
+    "۲": "2",
+    "۳": "3",
+    "۴": "4",
+    "۵": "5",
+    "۶": "6",
+    "۷": "7",
+    "۸": "8",
+    "۹": "9",
+  };
+
+  const convertToEnglish = (value: string) => value.replace(/[۰-۹]/g, (digit) => englishDigits[digit]);
+
+  const hourText = convertToEnglish(String(hour).padStart(2, "0"));
+
+  const minuteText = convertToEnglish(String(minute).padStart(2, "0"));
+
+  return `${hourText}:${minuteText}`;
+}
+
 export default function ConversationPage() {
   const [conversationId, setConversationId] = useState("armin");
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -139,19 +167,15 @@ export default function ConversationPage() {
       return;
     }
 
-    setMessages((current) => [
-      ...current,
-      {
-        id: Date.now(),
-        sender: "me",
-        text: value,
-        time: new Intl.DateTimeFormat("fa-IR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }).format(new Date()),
-        read: false,
-      },
-    ]);
+    const newMessage: Message = {
+      id: Date.now(),
+      sender: "me",
+      text: value,
+      time: getEnglishTime(),
+      read: false,
+    };
+
+    setMessages((current) => [...current, newMessage]);
 
     setMessage("");
   };
@@ -301,11 +325,9 @@ export default function ConversationPage() {
             <div className="absolute left-3 top-14 z-50 w-52 overflow-hidden rounded-2xl border border-border bg-surface p-1.5 shadow-2xl">
               <MenuButton icon={<FiUser size={16} />} title="مشاهده پروفایل" />
 
-              <MenuButton icon={<FiLink size={16} />} title="لینک‌های این گفتگو" />
+              <MenuButton icon={<FiLink size={16} />} title="گزارش تخلف" />
 
               <MenuButton icon={<FiCopy size={16} />} title="کپی نام کاربری" />
-
-              <MenuButton icon={<FiMoreHorizontal size={16} />} title="گزینه‌های بیشتر" />
             </div>
           )}
         </header>
@@ -399,8 +421,6 @@ export default function ConversationPage() {
               <FiSend size={18} />
             </button>
           </div>
-
-          <p className="mx-auto mt-2 hidden max-w-4xl text-[9px] text-muted sm:block">Enter برای ارسال پیام • Shift + Enter برای خط جدید</p>
         </footer>
       </section>
     </main>
@@ -412,7 +432,7 @@ function MessageBubble({ message }: { message: Message }) {
 
   return (
     <div className={`flex ${isMe ? "justify-start" : "justify-end"}`}>
-      <div className={`max-w-[88%] sm:max-w-[70%] ${isMe ? "items-start" : "items-end"} flex flex-col`}>
+      <div className={`flex max-w-[88%] flex-col sm:max-w-[70%] ${isMe ? "items-start" : "items-end"}`}>
         <div className={`rounded-2xl px-4 py-2.5 ${isMe ? "rounded-bl-md bg-primary text-background" : "rounded-br-md border border-border bg-surface/80 text-foreground"}`}>
           {message.text && <LinkifiedText text={message.text} />}
 
@@ -431,8 +451,26 @@ function MessageBubble({ message }: { message: Message }) {
           )}
         </div>
 
-        <div className="mt-1 flex items-center gap-1.5 px-1">
-          <span className="text-[9px] text-muted">{message.time}</span>
+        <div
+          dir="ltr"
+          style={{
+            direction: "ltr",
+            unicodeBidi: "isolate",
+          }}
+          className="mt-1 flex items-center gap-1.5 px-1"
+        >
+          <span
+            dir="ltr"
+            lang="en"
+            style={{
+              direction: "ltr",
+              unicodeBidi: "isolate",
+              fontVariantNumeric: "tabular-nums",
+            }}
+            className="text-[9px] text-muted"
+          >
+            {message.time}
+          </span>
 
           {isMe && (message.read ? <FiCheckCircle size={12} className="text-primary" /> : <FiCheck size={12} className="text-muted" />)}
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FiAward, FiCamera, FiCheck, FiEdit3, FiHeart, FiLock, FiMail, FiMessageCircle, FiPhone, FiShield, FiStar, FiUser, FiUsers, FiZap } from "react-icons/fi";
+import { FiAward, FiCamera, FiCheck, FiEdit3, FiHeart, FiImage, FiLock, FiMail, FiPhone, FiShield, FiStar, FiUser, FiX, FiZap } from "react-icons/fi";
 
 const games = ["Valorant", "CS2", "PUBG", "Fortnite", "Apex Legends", "Dota 2", "Rainbow Six", "Overwatch 2"];
 
@@ -34,18 +34,113 @@ const collectionCards = [
 
 export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
-  const [following, setFollowing] = useState(false);
-  const [friendRequested, setFriendRequested] = useState(false);
   const [showGender, setShowGender] = useState(true);
   const [selectedGames, setSelectedGames] = useState(["Valorant", "CS2", "PUBG"]);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordStep, setPasswordStep] = useState<"current" | "new">("current");
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [forgotStep, setForgotStep] = useState<"email" | "otp" | "new">("email");
 
-  const followers = following ? 1285 : 1284;
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const followers = 1284;
   const followingCount = 386;
-  const friends = 24;
-  const isVerified = followers >= 1000;
 
   const toggleGame = (game: string) => {
     setSelectedGames((current) => (current.includes(game) ? current.filter((item) => item !== game) : [...current, game]));
+  };
+
+  const openPasswordModal = () => {
+    setShowPasswordModal(true);
+    setPasswordStep("current");
+    setForgotPassword(false);
+    setForgotStep("email");
+    setCurrentPassword("");
+    setNewPassword("");
+    setRepeatPassword("");
+    setEmail("");
+    setOtp("");
+    setPasswordError("");
+  };
+
+  const closePasswordModal = () => {
+    setShowPasswordModal(false);
+    setPasswordError("");
+  };
+
+  const verifyCurrentPassword = () => {
+    if (!currentPassword.trim()) {
+      setPasswordError("رمز عبور فعلی را وارد کنید.");
+      return;
+    }
+
+    setPasswordError("");
+    setPasswordStep("new");
+  };
+
+  const changePassword = () => {
+    if (!newPassword.trim()) {
+      setPasswordError("رمز عبور جدید را وارد کنید.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError("رمز عبور جدید باید حداقل ۸ کاراکتر باشد.");
+      return;
+    }
+
+    if (newPassword !== repeatPassword) {
+      setPasswordError("تکرار رمز عبور با رمز جدید یکسان نیست.");
+      return;
+    }
+
+    setPasswordError("");
+    closePasswordModal();
+  };
+
+  const sendOtp = () => {
+    if (!email.trim()) {
+      setPasswordError("ایمیل خود را وارد کنید.");
+      return;
+    }
+
+    setPasswordError("");
+    setForgotStep("otp");
+  };
+
+  const verifyOtp = () => {
+    if (otp.trim().length < 4) {
+      setPasswordError("کد تأیید را کامل وارد کنید.");
+      return;
+    }
+
+    setPasswordError("");
+    setForgotStep("new");
+  };
+
+  const resetPassword = () => {
+    if (!newPassword.trim()) {
+      setPasswordError("رمز عبور جدید را وارد کنید.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError("رمز عبور جدید باید حداقل ۸ کاراکتر باشد.");
+      return;
+    }
+
+    if (newPassword !== repeatPassword) {
+      setPasswordError("تکرار رمز عبور با رمز جدید یکسان نیست.");
+      return;
+    }
+
+    setPasswordError("");
+    closePasswordModal();
   };
 
   return (
@@ -56,7 +151,7 @@ export default function ProfilePage() {
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <h1 className="text-2xl font-black text-foreground sm:text-3xl">پروفایل</h1>
+              <h1 className="text-2xl font-black text-foreground sm:text-3xl">پروفایل من</h1>
 
               <p className="mt-2 text-xs leading-6 text-foreground-secondary sm:text-sm sm:leading-7">پروفایل، فعالیت‌ها و مشخصات گیمینگ خود را مدیریت کنید.</p>
             </div>
@@ -126,11 +221,9 @@ export default function ProfilePage() {
                 <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
                   <h2 className="text-2xl font-black text-foreground">jaki</h2>
 
-                  {isVerified && (
-                    <button type="button" title="این حساب بیش از ۱۰۰۰ دنبال‌کننده دارد" className="flex h-6 w-6 items-center justify-center rounded-full bg-success text-white">
-                      <FiCheck size={14} strokeWidth={3} />
-                    </button>
-                  )}
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-success text-white">
+                    <FiCheck size={14} strokeWidth={3} />
+                  </span>
 
                   <span className="rounded-full bg-success/10 px-3 py-1 text-[11px] font-semibold text-success">آنلاین</span>
                 </div>
@@ -139,45 +232,9 @@ export default function ProfilePage() {
 
                 <p className="mx-auto mt-3 max-w-xl text-xs leading-6 text-foreground-secondary sm:text-sm sm:leading-7 lg:mx-0">عاشق بازی، رقابت و پیدا کردن هم‌تیمی‌های جدید.</p>
               </div>
-
-              <div className="grid w-full grid-cols-[1fr_1fr_auto] gap-2 lg:w-auto">
-                <button
-                  type="button"
-                  onClick={() => setFollowing((value) => !value)}
-                  className={`flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold transition-all sm:h-12 sm:px-4 sm:text-sm ${
-                    following ? "border border-border bg-background-secondary text-foreground" : "bg-primary text-background hover:bg-primary-hover"
-                  }`}
-                >
-                  <FiUsers size={16} />
-
-                  <span className="hidden xs:inline sm:inline">{following ? "دنبال می‌کنید" : "دنبال کردن"}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setFriendRequested((value) => !value)}
-                  className={`flex h-11 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-semibold transition-all sm:h-12 sm:px-4 sm:text-sm ${
-                    friendRequested ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-background-secondary text-foreground hover:border-primary hover:text-primary"
-                  }`}
-                >
-                  <FiUsers size={16} />
-
-                  <span className="hidden sm:inline">{friendRequested ? "درخواست ارسال شد" : "درخواست دوستی"}</span>
-                </button>
-
-                <button
-                  type="button"
-                  aria-label="ارسال پیام"
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background-secondary text-muted transition hover:border-primary hover:text-primary sm:h-12 sm:w-12"
-                >
-                  <FiMessageCircle size={17} />
-                </button>
-              </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-3 divide-x divide-x-reverse divide-border rounded-2xl border border-border bg-background-secondary/50">
-              <ProfileSocialStat value={friends.toString()} label="دوستان" />
-
+            <div className="mt-6 grid grid-cols-2 divide-x divide-x-reverse divide-border rounded-2xl border border-border bg-background-secondary/50">
               <ProfileSocialStat value={followers.toLocaleString("en-US")} label="دنبال‌کننده" />
 
               <ProfileSocialStat value={followingCount.toLocaleString("en-US")} label="دنبال‌شونده" />
@@ -202,6 +259,24 @@ export default function ProfilePage() {
             </div>
 
             <p className="mt-3 text-xl font-black text-primary sm:mt-4 sm:text-2xl">100</p>
+          </div>
+        </section>
+
+        <section className="mt-6 overflow-hidden rounded-3xl border border-border bg-surface/50 backdrop-blur-xl sm:mt-8">
+          <div className="flex items-center gap-2 border-b border-border px-4 sm:px-6">
+            <div className="flex h-14 items-center gap-2 border-b-2 border-primary text-xs font-bold text-primary">
+              <FiImage size={16} />
+              پست‌ها
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 p-2 sm:grid-cols-3 sm:gap-3 sm:p-3">
+            <PostCard text="آخرین رقابت NΞXUS 🎮" />
+            <PostCard text="شب گیم با بچه‌ها 🔥" />
+            <PostCard text="نتیجه مسابقه این هفته 🏆" />
+            <PostCard text="Setup جدید من ⚡" />
+            <PostCard text="آماده برای رنک جدید؟" />
+            <PostCard text="NΞXUS Community ❤️" />
           </div>
         </section>
 
@@ -347,6 +422,7 @@ export default function ProfilePage() {
 
             <button
               type="button"
+              onClick={openPasswordModal}
               className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-border px-5 text-xs font-semibold text-foreground transition-all duration-300 hover:border-primary hover:text-primary sm:h-12 sm:w-auto sm:text-sm"
             >
               <FiLock size={16} />
@@ -357,8 +433,302 @@ export default function ProfilePage() {
 
         <div className="h-6 sm:h-8" />
       </div>
+
+      {showPasswordModal && (
+        <PasswordModal
+          passwordStep={passwordStep}
+          forgotPassword={forgotPassword}
+          forgotStep={forgotStep}
+          currentPassword={currentPassword}
+          newPassword={newPassword}
+          repeatPassword={repeatPassword}
+          email={email}
+          otp={otp}
+          passwordError={passwordError}
+          setCurrentPassword={setCurrentPassword}
+          setNewPassword={setNewPassword}
+          setRepeatPassword={setRepeatPassword}
+          setEmail={setEmail}
+          setOtp={setOtp}
+          setPasswordError={setPasswordError}
+          setForgotPassword={setForgotPassword}
+          setForgotStep={setForgotStep}
+          setPasswordStep={setPasswordStep}
+          verifyCurrentPassword={verifyCurrentPassword}
+          changePassword={changePassword}
+          sendOtp={sendOtp}
+          verifyOtp={verifyOtp}
+          resetPassword={resetPassword}
+          close={closePasswordModal}
+        />
+      )}
     </main>
   );
+}
+
+function PasswordModal({
+  passwordStep,
+  forgotPassword,
+  forgotStep,
+  currentPassword,
+  newPassword,
+  repeatPassword,
+  email,
+  otp,
+  passwordError,
+  setCurrentPassword,
+  setNewPassword,
+  setRepeatPassword,
+  setEmail,
+  setOtp,
+  setPasswordError,
+  setForgotPassword,
+  setForgotStep,
+  verifyCurrentPassword,
+  changePassword,
+  sendOtp,
+  verifyOtp,
+  resetPassword,
+  close,
+}: {
+  passwordStep: "current" | "new";
+  forgotPassword: boolean;
+  forgotStep: "email" | "otp" | "new";
+  currentPassword: string;
+  newPassword: string;
+  repeatPassword: string;
+  email: string;
+  otp: string;
+  passwordError: string;
+  setCurrentPassword: (value: string) => void;
+  setNewPassword: (value: string) => void;
+  setRepeatPassword: (value: string) => void;
+  setEmail: (value: string) => void;
+  setOtp: (value: string) => void;
+  setPasswordError: (value: string) => void;
+  setForgotPassword: (value: boolean) => void;
+  setForgotStep: (value: "email" | "otp" | "new") => void;
+  setPasswordStep: (value: "current" | "new") => void;
+  verifyCurrentPassword: () => void;
+  changePassword: () => void;
+  sendOtp: () => void;
+  verifyOtp: () => void;
+  resetPassword: () => void;
+  close: () => void;
+}) {
+  return (
+    <div
+      dir="rtl"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          close();
+        }
+      }}
+    >
+      <div className="w-full max-w-md overflow-hidden rounded-3xl border border-border bg-surface shadow-2xl">
+        <div className="flex items-center justify-between border-b border-border p-5">
+          <div>
+            <h2 className="text-base font-black text-foreground">{forgotPassword ? "بازیابی رمز عبور" : "تغییر رمز عبور"}</h2>
+
+            <p className="mt-1 text-[10px] text-muted">{forgotPassword ? "بازیابی امن حساب با ایمیل" : "رمز عبور حساب خود را تغییر دهید"}</p>
+          </div>
+
+          <button type="button" onClick={close} className="flex h-9 w-9 items-center justify-center rounded-xl text-muted transition hover:bg-surface-hover hover:text-foreground">
+            <FiX size={18} />
+          </button>
+        </div>
+
+        <div className="p-5 sm:p-6">
+          {!forgotPassword && passwordStep === "current" && (
+            <div className="space-y-4">
+              <PasswordInput label="رمز عبور فعلی" value={currentPassword} onChange={setCurrentPassword} autoFocus />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setForgotPassword(true);
+                  setForgotStep("email");
+                  setPasswordError("");
+                }}
+                className="text-xs font-semibold text-primary transition hover:text-primary-hover"
+              >
+                رمز عبورم را فراموش کرده‌ام
+              </button>
+
+              {passwordError && <ErrorMessage text={passwordError} />}
+
+              <button
+                type="button"
+                onClick={verifyCurrentPassword}
+                className="flex h-12 w-full items-center justify-center rounded-2xl bg-primary text-sm font-black text-background transition hover:bg-primary-hover"
+              >
+                ادامه
+              </button>
+            </div>
+          )}
+
+          {!forgotPassword && passwordStep === "new" && (
+            <div className="space-y-4">
+              <PasswordInput label="رمز عبور جدید" value={newPassword} onChange={setNewPassword} autoFocus />
+
+              <PasswordInput label="تکرار رمز عبور جدید" value={repeatPassword} onChange={setRepeatPassword} />
+
+              {passwordError && <ErrorMessage text={passwordError} />}
+
+              <button
+                type="button"
+                onClick={changePassword}
+                className="flex h-12 w-full items-center justify-center rounded-2xl bg-primary text-sm font-black text-background transition hover:bg-primary-hover"
+              >
+                تغییر رمز عبور
+              </button>
+            </div>
+          )}
+
+          {forgotPassword && forgotStep === "email" && (
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                <div className="flex items-start gap-3">
+                  <FiMail size={19} className="mt-0.5 shrink-0 text-primary" />
+
+                  <p className="text-xs leading-6 text-foreground-secondary">ایمیلی که با آن حساب خود را ثبت کرده‌اید وارد کنید تا کد تأیید برای شما ارسال شود.</p>
+                </div>
+              </div>
+
+              <TextInput label="ایمیل" type="email" value={email} onChange={setEmail} placeholder="example@email.com" autoFocus />
+
+              {passwordError && <ErrorMessage text={passwordError} />}
+
+              <button
+                type="button"
+                onClick={sendOtp}
+                className="flex h-12 w-full items-center justify-center rounded-2xl bg-primary text-sm font-black text-background transition hover:bg-primary-hover"
+              >
+                ارسال کد تأیید
+              </button>
+            </div>
+          )}
+
+          {forgotPassword && forgotStep === "otp" && (
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                <p className="text-center text-xs leading-6 text-foreground-secondary">کد تأیید ارسال شده به</p>
+
+                <p dir="ltr" className="mt-1 text-center text-sm font-bold text-primary">
+                  {email}
+                </p>
+              </div>
+
+              <TextInput label="کد تأیید" value={otp} onChange={setOtp} placeholder="کد ۴ یا ۶ رقمی" inputMode="numeric" autoFocus />
+
+              {passwordError && <ErrorMessage text={passwordError} />}
+
+              <button
+                type="button"
+                onClick={verifyOtp}
+                className="flex h-12 w-full items-center justify-center rounded-2xl bg-primary text-sm font-black text-background transition hover:bg-primary-hover"
+              >
+                تأیید کد
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setForgotStep("email");
+                  setPasswordError("");
+                }}
+                className="w-full text-center text-xs font-semibold text-muted transition hover:text-primary"
+              >
+                تغییر ایمیل
+              </button>
+            </div>
+          )}
+
+          {forgotPassword && forgotStep === "new" && (
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-success/20 bg-success/5 p-4">
+                <div className="flex items-center gap-2">
+                  <FiCheck size={17} className="text-success" />
+
+                  <p className="text-xs font-semibold text-success">ایمیل تأیید شد</p>
+                </div>
+              </div>
+
+              <PasswordInput label="رمز عبور جدید" value={newPassword} onChange={setNewPassword} autoFocus />
+
+              <PasswordInput label="تکرار رمز عبور جدید" value={repeatPassword} onChange={setRepeatPassword} />
+
+              {passwordError && <ErrorMessage text={passwordError} />}
+
+              <button
+                type="button"
+                onClick={resetPassword}
+                className="flex h-12 w-full items-center justify-center rounded-2xl bg-primary text-sm font-black text-background transition hover:bg-primary-hover"
+              >
+                ذخیره رمز عبور جدید
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PasswordInput({ label, value, onChange, autoFocus }: { label: string; value: string; onChange: (value: string) => void; autoFocus?: boolean }) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs font-semibold text-foreground">{label}</label>
+
+      <input
+        type="password"
+        value={value}
+        autoFocus={autoFocus}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-12 w-full rounded-2xl border border-border bg-background-secondary px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+      />
+    </div>
+  );
+}
+
+function TextInput({
+  label,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  autoFocus,
+  inputMode,
+}: {
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  autoFocus?: boolean;
+  inputMode?: "text" | "numeric" | "email" | "tel" | "url";
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs font-semibold text-foreground">{label}</label>
+
+      <input
+        type={type}
+        value={value}
+        autoFocus={autoFocus}
+        inputMode={inputMode}
+        dir={type === "email" ? "ltr" : "rtl"}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="h-12 w-full rounded-2xl border border-border bg-background-secondary px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+      />
+    </div>
+  );
+}
+
+function ErrorMessage({ text }: { text: string }) {
+  return <div className="rounded-xl border border-error/20 bg-error/5 px-3 py-2.5 text-xs text-error">{text}</div>;
 }
 
 function ProfileSocialStat({ value, label }: { value: string; label: string }) {
@@ -382,6 +752,25 @@ function ProfileStat({ label, value, icon }: { label: string; value: string; ico
 
       <p className="mt-3 text-xl font-black text-foreground sm:mt-4 sm:text-2xl">{value}</p>
     </div>
+  );
+}
+
+function PostCard({ text }: { text: string }) {
+  return (
+    <button type="button" className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-background-secondary text-right transition hover:border-primary/50">
+      <div className="absolute inset-0 bg-linear-to-br from-primary/20 via-background-secondary to-primary/5" />
+
+      <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-primary/10 blur-2xl" />
+
+      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/30 to-transparent p-3">
+        <p className="text-[10px] font-bold leading-5 text-white sm:text-xs">{text}</p>
+
+        <div className="mt-1 flex items-center gap-1 text-[9px] text-white/60">
+          <FiHeart size={10} />
+          128
+        </div>
+      </div>
+    </button>
   );
 }
 
