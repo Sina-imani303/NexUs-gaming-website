@@ -1,8 +1,30 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { FiArrowRight, FiCheck, FiCheckCircle, FiCopy, FiFile, FiImage, FiLink, FiMoreHorizontal, FiPaperclip, FiPhone, FiPlus, FiSearch, FiSend, FiSmile, FiUser, FiVideo, FiX } from "react-icons/fi";
+import type { ReactNode } from "react";
+import {
+  FiArrowRight,
+  FiBell,
+  FiBellOff,
+  FiCheck,
+  FiCheckCircle,
+  FiCopy,
+  FiFile,
+  FiImage,
+  FiLink,
+  FiMoreHorizontal,
+  FiPaperclip,
+  FiPhone,
+  FiPlus,
+  FiSearch,
+  FiSend,
+  FiSmile,
+  FiUser,
+  FiVideo,
+  FiX,
+} from "react-icons/fi";
 
 type Message = {
   id: number;
@@ -16,7 +38,16 @@ type Message = {
   };
 };
 
-const users = {
+type User = {
+  name: string;
+  username: string;
+  status: string;
+  online: boolean;
+  verified: boolean;
+  avatar: string;
+};
+
+const users: Record<string, User> = {
   armin: {
     name: "Armin",
     username: "@armin",
@@ -119,30 +150,22 @@ function getEnglishTime() {
   const hour = now.getHours();
   const minute = now.getMinutes();
 
-  const englishDigits: Record<string, string> = {
-    "۰": "0",
-    "۱": "1",
-    "۲": "2",
-    "۳": "3",
-    "۴": "4",
-    "۵": "5",
-    "۶": "6",
-    "۷": "7",
-    "۸": "8",
-    "۹": "9",
-  };
-
-  const convertToEnglish = (value: string) => value.replace(/[۰-۹]/g, (digit) => englishDigits[digit]);
-
-  const hourText = convertToEnglish(String(hour).padStart(2, "0"));
-
-  const minuteText = convertToEnglish(String(minute).padStart(2, "0"));
+  const hourText = String(hour).padStart(2, "0");
+  const minuteText = String(minute).padStart(2, "0");
 
   return `${hourText}:${minuteText}`;
 }
 
 export default function ConversationPage() {
-  const [conversationId, setConversationId] = useState("armin");
+  const params = useParams<{ conversationId?: string }>();
+
+  const conversationId = String(params?.conversationId ?? "armin")
+    .toLowerCase()
+    .replace("@", "");
+
+  const user = users[conversationId] ?? users.armin;
+  const [notifications, setNotifications] = useState(true);
+
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [message, setMessage] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -150,14 +173,14 @@ export default function ConversationPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [attachmentOpen, setAttachmentOpen] = useState(false);
 
-  const user = users[conversationId as keyof typeof users] ?? users.armin;
-
   const filteredMessages = useMemo(() => {
     if (!search.trim()) {
       return messages;
     }
 
-    return messages.filter((item) => item.text?.toLowerCase().includes(search.toLowerCase()));
+    const query = search.trim().toLowerCase();
+
+    return messages.filter((item) => item.text?.toLowerCase().includes(query));
   }, [messages, search]);
 
   const sendMessage = () => {
@@ -176,67 +199,16 @@ export default function ConversationPage() {
     };
 
     setMessages((current) => [...current, newMessage]);
-
     setMessage("");
   };
 
-  const handleConversationChange = (id: keyof typeof users) => {
-    setConversationId(id);
-    setMessages(initialMessages);
-    setSearch("");
-    setSearchOpen(false);
-    setMenuOpen(false);
-  };
-
   return (
-    <main dir="rtl" className="font-vazir flex min-h-screen bg-background text-foreground">
-      <aside className="hidden w-80 shrink-0 flex-col border-l border-border bg-surface/50 lg:flex">
-        <div className="border-b border-border p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold tracking-[3px] text-primary">NΞXUS</p>
-
-              <h1 className="mt-1 text-lg font-black text-foreground">گفتگوها</h1>
-            </div>
-
-            <Link
-              href="/chat"
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border text-muted transition hover:border-primary hover:text-primary"
-              aria-label="بازگشت به چت‌ها"
-            >
-              <FiArrowRight size={18} />
-            </Link>
-          </div>
-
-          <div className="relative mt-4">
-            <FiSearch size={17} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted" />
-
-            <input
-              type="text"
-              placeholder="جستجو..."
-              className="h-11 w-full rounded-xl border border-border bg-background-secondary pr-10 pl-4 text-xs text-foreground outline-none transition focus:border-primary"
-            />
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-2">
-          <ConversationPreview name="Armin" username="@armin" avatar="A" active={conversationId === "armin"} online onClick={() => handleConversationChange("armin")} />
-
-          <ConversationPreview name="Ali" username="@ali" avatar="A" active={conversationId === "ali"} onClick={() => handleConversationChange("ali")} />
-
-          <ConversationPreview name="Sina" username="@sina" avatar="S" active={conversationId === "sina"} online onClick={() => handleConversationChange("sina")} />
-        </div>
-      </aside>
-
+    <main dir="rtl" className="font-vazir flex min-h-screen min-w-0 bg-background text-foreground">
       <section className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-xl">
           <div className="flex h-16 items-center gap-3 px-3 sm:px-5">
-            <Link
-              href="/chat"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-muted transition hover:border-primary hover:text-primary lg:hidden"
-              aria-label="بازگشت"
-            >
-              <FiArrowRight size={19} />
+            <Link href="/chat" aria-label="بازگشت" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted transition hover:bg-surface-hover hover:text-primary">
+              <FiArrowRight size={20} />
             </Link>
 
             <Link href={`/profile/${user.username.replace("@", "")}`} className="relative shrink-0">
@@ -267,6 +239,14 @@ export default function ConversationPage() {
               >
                 <FiSearch size={18} />
               </button>
+              <button
+                type="button"
+                onClick={() => setNotifications((value) => !value)}
+                aria-label="اعلان‌ها"
+                className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${notifications ? "text-primary hover:bg-primary/10" : "text-muted hover:bg-surface-hover"}`}
+              >
+                {notifications ? <FiBell size={18} /> : <FiBellOff size={18} />}
+              </button>
 
               <button type="button" className="hidden h-10 w-10 items-center justify-center rounded-xl text-muted transition hover:bg-surface-hover hover:text-primary sm:flex" aria-label="تماس صوتی">
                 <FiPhone size={18} />
@@ -286,7 +266,7 @@ export default function ConversationPage() {
                   setMenuOpen((current) => !current);
                   setSearchOpen(false);
                 }}
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-muted transition hover:bg-surface-hover hover:text-primary"
+                className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${menuOpen ? "bg-primary/10 text-primary" : "text-muted hover:bg-surface-hover hover:text-primary"}`}
                 aria-label="بیشتر"
               >
                 <FiMoreHorizontal size={19} />
@@ -313,6 +293,7 @@ export default function ConversationPage() {
                     type="button"
                     onClick={() => setSearch("")}
                     className="absolute left-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted hover:text-foreground"
+                    aria-label="پاک کردن جستجو"
                   >
                     <FiX size={15} />
                   </button>
@@ -322,20 +303,47 @@ export default function ConversationPage() {
           )}
 
           {menuOpen && (
-            <div className="absolute left-3 top-14 z-50 w-52 overflow-hidden rounded-2xl border border-border bg-surface p-1.5 shadow-2xl">
-              <MenuButton icon={<FiUser size={16} />} title="مشاهده پروفایل" />
+            <>
+              <button type="button" aria-label="بستن منو" onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 cursor-default" />
 
-              <MenuButton icon={<FiLink size={16} />} title="گزارش تخلف" />
+              <div className="absolute left-3 top-14 z-50 w-52 overflow-hidden rounded-2xl border border-border bg-surface p-1.5 shadow-2xl">
+                <Link
+                  href={`/profile/${user.username.replace("@", "")}`}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-xs font-semibold text-foreground transition hover:bg-surface-hover hover:text-primary"
+                >
+                  <FiUser size={16} />
+                  مشاهده پروفایل
+                </Link>
 
-              <MenuButton icon={<FiCopy size={16} />} title="کپی نام کاربری" />
-            </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(user.username);
+                    setMenuOpen(false);
+                  }}
+                  className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-xs font-semibold text-foreground transition hover:bg-surface-hover hover:text-primary"
+                >
+                  <FiCopy size={16} />
+                  کپی نام کاربری
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-xs font-semibold text-foreground transition hover:bg-surface-hover hover:text-primary"
+                >
+                  <FiLink size={16} />
+                  گزارش تخلف
+                </button>
+              </div>
+            </>
           )}
         </header>
 
         <div className="relative flex-1 overflow-y-auto bg-background-secondary/20 px-3 py-5 sm:px-6 lg:px-10">
           <div className="pointer-events-none absolute inset-0 opacity-40">
             <div className="absolute -right-32 top-20 h-80 w-80 rounded-full bg-primary/5 blur-[120px]" />
-
             <div className="absolute -left-32 bottom-20 h-80 w-80 rounded-full bg-primary/5 blur-[120px]" />
           </div>
 
@@ -501,36 +509,7 @@ function LinkifiedText({ text }: { text: string }) {
   );
 }
 
-function ConversationPreview({ name, username, avatar, active, online, onClick }: { name: string; username: string; avatar: string; active: boolean; online?: boolean; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} className={`flex w-full items-center gap-3 rounded-2xl p-3 text-right transition-all duration-300 ${active ? "bg-primary/10" : "hover:bg-surface-hover"}`}>
-      <div className="relative shrink-0">
-        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl font-black ${active ? "bg-primary text-background" : "bg-primary/10 text-primary"}`}>{avatar}</div>
-
-        {online && <span className="absolute bottom-0 left-0 h-3.5 w-3.5 rounded-full border-2 border-surface bg-success" />}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-foreground">{name}</p>
-
-        <p className="mt-1 truncate text-[10px] text-muted">{username}</p>
-      </div>
-
-      {active && <span className="h-2 w-2 rounded-full bg-primary" />}
-    </button>
-  );
-}
-
-function MenuButton({ icon, title }: { icon: React.ReactNode; title: string }) {
-  return (
-    <button type="button" className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-xs font-semibold text-foreground transition hover:bg-surface-hover hover:text-primary">
-      {icon}
-      {title}
-    </button>
-  );
-}
-
-function AttachmentButton({ icon, title }: { icon: React.ReactNode; title: string }) {
+function AttachmentButton({ icon, title }: { icon: ReactNode; title: string }) {
   return (
     <button
       type="button"

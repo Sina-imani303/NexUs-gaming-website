@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { use, useMemo, useState } from "react";
 import {
   FiArrowRight,
+  FiBell,
+  FiBellOff,
   FiCheck,
   FiCheckCircle,
   FiChevronLeft,
   FiFile,
+  FiHash,
   FiImage,
   FiInfo,
   FiLink,
@@ -35,77 +38,26 @@ type Message = {
   };
 };
 
-const initialMessages: Message[] = [
-  {
-    id: 1,
-    sender: "other",
-    name: "Armin",
-    avatar: "A",
-    text: "سلام بچه‌ها 👋",
-    time: "19:42",
-    read: true,
-  },
-  {
-    id: 2,
-    sender: "other",
-    name: "Mahan",
-    avatar: "M",
-    text: "امشب کسی برای بازی هست؟",
-    time: "19:43",
-    read: true,
-  },
-  {
-    id: 3,
-    sender: "me",
-    name: "Sina",
-    avatar: "S",
-    text: "آره من هستم، ساعت ۱۰ خوبه؟",
-    time: "19:44",
-    read: true,
-  },
-  {
-    id: 4,
-    sender: "other",
-    name: "Reza",
-    avatar: "R",
-    text: "برای من اوکیه.",
-    time: "19:45",
-    read: true,
-  },
-  {
-    id: 5,
-    sender: "other",
-    name: "Armin",
-    avatar: "A",
-    text: "پس ساعت ۱۰ شروع می‌کنیم.",
-    time: "19:46",
-    read: true,
-  },
-  {
-    id: 6,
-    sender: "other",
-    name: "Mahan",
-    avatar: "M",
-    text: "https://nexus.example.com/game",
-    time: "19:48",
-    read: true,
-  },
-  {
-    id: 7,
-    sender: "other",
-    name: "Armin",
-    avatar: "A",
-    text: "این فایل تنظیمات بازیه.",
-    time: "19:50",
-    read: true,
-    file: {
-      name: "game-config.zip",
-      size: "2.4 MB",
-    },
-  },
-];
+type Group = {
+  username: string;
+  name: string;
+  avatar: string;
+  members: number;
+  online: number;
+  verified: boolean;
+  description: string;
+  type: string;
+  messages: Message[];
+  membersList: {
+    name: string;
+    username: string;
+    avatar: string;
+    role: string;
+    online: boolean;
+  }[];
+};
 
-const members = [
+const baseMembers = [
   {
     name: "Sina",
     username: "@sina",
@@ -143,8 +95,263 @@ const members = [
   },
 ];
 
-export default function GroupPage() {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+const groups: Record<string, Group> = {
+  gamingteam: {
+    username: "gamingteam",
+    name: "Gaming Team",
+    avatar: "GT",
+    members: 128,
+    online: 34,
+    verified: true,
+    description: "تیم اصلی گیمرهای NexUs برای بازی، گفتگو و ساخت تیم‌های مختلف.",
+    type: "عمومی",
+    messages: [
+      {
+        id: 1,
+        sender: "other",
+        name: "Armin",
+        avatar: "A",
+        text: "سلام بچه‌ها 👋",
+        time: "19:42",
+        read: true,
+      },
+      {
+        id: 2,
+        sender: "other",
+        name: "Mahan",
+        avatar: "M",
+        text: "امشب کسی برای بازی هست؟",
+        time: "19:43",
+        read: true,
+      },
+      {
+        id: 3,
+        sender: "me",
+        name: "Sina",
+        avatar: "S",
+        text: "آره من هستم، ساعت ۱۰ خوبه؟",
+        time: "19:44",
+        read: true,
+      },
+      {
+        id: 4,
+        sender: "other",
+        name: "Reza",
+        avatar: "R",
+        text: "برای من اوکیه.",
+        time: "19:45",
+        read: true,
+      },
+      {
+        id: 5,
+        sender: "other",
+        name: "Armin",
+        avatar: "A",
+        text: "پس ساعت ۱۰ شروع می‌کنیم.",
+        time: "19:46",
+        read: true,
+      },
+      {
+        id: 6,
+        sender: "other",
+        name: "Mahan",
+        avatar: "M",
+        text: "https://nexus.example.com/game",
+        time: "19:48",
+        read: true,
+      },
+      {
+        id: 7,
+        sender: "other",
+        name: "Armin",
+        avatar: "A",
+        text: "این فایل تنظیمات بازیه.",
+        time: "19:50",
+        read: true,
+        file: {
+          name: "game-config.zip",
+          size: "2.4 MB",
+        },
+      },
+    ],
+    membersList: baseMembers,
+  },
+
+  valorant: {
+    username: "valorant",
+    name: "Valorant Club",
+    avatar: "VC",
+    members: 96,
+    online: 27,
+    verified: true,
+    description: "جامعه بازیکنان Valorant برای تمرین، مسابقات و پیدا کردن هم‌تیمی.",
+    type: "عمومی",
+    messages: [
+      {
+        id: 101,
+        sender: "other",
+        name: "Admin",
+        avatar: "A",
+        text: "به Valorant Club خوش آمدید 🎮",
+        time: "17:10",
+        read: true,
+      },
+      {
+        id: 102,
+        sender: "other",
+        name: "Sina",
+        avatar: "S",
+        text: "تورمنت جدید شروع شد.",
+        time: "17:15",
+        read: true,
+      },
+      {
+        id: 103,
+        sender: "me",
+        name: "Sina",
+        avatar: "S",
+        text: "چه ساعتی مسابقه داریم؟",
+        time: "17:18",
+        read: true,
+      },
+      {
+        id: 104,
+        sender: "other",
+        name: "Armin",
+        avatar: "A",
+        text: "امشب ساعت ۹.",
+        time: "17:20",
+        read: true,
+      },
+    ],
+    membersList: [
+      {
+        name: "Sina",
+        username: "@sina",
+        avatar: "S",
+        role: "مالک",
+        online: true,
+      },
+      {
+        name: "Admin",
+        username: "@admin",
+        avatar: "A",
+        role: "مدیر",
+        online: true,
+      },
+      {
+        name: "Armin",
+        username: "@armin",
+        avatar: "A",
+        role: "عضو",
+        online: true,
+      },
+      {
+        name: "Mahan",
+        username: "@mahan",
+        avatar: "M",
+        role: "عضو",
+        online: false,
+      },
+      {
+        name: "Ali",
+        username: "@ali",
+        avatar: "A",
+        role: "عضو",
+        online: false,
+      },
+    ],
+  },
+
+  friends: {
+    username: "friends",
+    name: "Friends",
+    avatar: "FR",
+    members: 54,
+    online: 18,
+    verified: false,
+    description: "گروه دوستان و گپ روزانه برای هماهنگی بازی و گفتگو.",
+    type: "خصوصی",
+    messages: [
+      {
+        id: 201,
+        sender: "other",
+        name: "Mahan",
+        avatar: "M",
+        text: "کسی امشب بازی می‌کنه؟",
+        time: "16:40",
+        read: true,
+      },
+      {
+        id: 202,
+        sender: "other",
+        name: "Reza",
+        avatar: "R",
+        text: "من هستم.",
+        time: "16:42",
+        read: true,
+      },
+      {
+        id: 203,
+        sender: "me",
+        name: "Sina",
+        avatar: "S",
+        text: "پس ساعت ۱۰ آنلاین میشم.",
+        time: "16:44",
+        read: true,
+      },
+      {
+        id: 204,
+        sender: "other",
+        name: "Armin",
+        avatar: "A",
+        text: "اوکی 👌",
+        time: "16:45",
+        read: true,
+      },
+    ],
+    membersList: [
+      {
+        name: "Sina",
+        username: "@sina",
+        avatar: "S",
+        role: "مالک",
+        online: true,
+      },
+      {
+        name: "Mahan",
+        username: "@mahan",
+        avatar: "M",
+        role: "مدیر",
+        online: true,
+      },
+      {
+        name: "Reza",
+        username: "@reza",
+        avatar: "R",
+        role: "عضو",
+        online: false,
+      },
+      {
+        name: "Armin",
+        username: "@armin",
+        avatar: "A",
+        role: "عضو",
+        online: true,
+      },
+    ],
+  },
+};
+
+export default function GroupPage({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = use(params);
+  const [notifications, setNotifications] = useState(true);
+
+  const normalizedUsername = username?.toLowerCase().replace(/^@/, "");
+
+  const group = groups[normalizedUsername] ?? groups.gamingteam;
+
+  const [messages, setMessages] = useState<Message[]>(group.messages);
   const [message, setMessage] = useState("");
   const [infoOpen, setInfoOpen] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
@@ -152,6 +359,16 @@ export default function GroupPage() {
   const [search, setSearch] = useState("");
   const [attachmentOpen, setAttachmentOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const filteredMessages = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    if (!query) {
+      return messages;
+    }
+
+    return messages.filter((item) => item.text?.toLowerCase().includes(query));
+  }, [messages, search]);
 
   const sendMessage = () => {
     const value = message.trim();
@@ -168,9 +385,10 @@ export default function GroupPage() {
         name: "Sina",
         avatar: "S",
         text: value,
-        time: new Intl.DateTimeFormat("fa-IR", {
+        time: new Intl.DateTimeFormat("en-US", {
           hour: "2-digit",
           minute: "2-digit",
+          hour12: false,
         }).format(new Date()),
         read: false,
       },
@@ -178,8 +396,6 @@ export default function GroupPage() {
 
     setMessage("");
   };
-
-  const filteredMessages = search.trim() ? messages.filter((item) => item.text?.toLowerCase().includes(search.toLowerCase())) : messages;
 
   return (
     <main dir="rtl" className="font-vazir flex min-h-screen bg-background text-foreground">
@@ -199,19 +415,22 @@ export default function GroupPage() {
               onClick={() => {
                 setInfoOpen(true);
                 setMembersOpen(false);
+                setMenuOpen(false);
               }}
               className="flex min-w-0 flex-1 items-center gap-3 text-right"
             >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary/30 to-primary/5 text-sm font-black text-primary">GT</div>
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary/30 to-primary/5 text-sm font-black text-primary">{group.avatar}</div>
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h1 className="truncate text-sm font-black sm:text-base">Gaming Team</h1>
+                  <h1 className="truncate text-sm font-black sm:text-base">{group.name}</h1>
 
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success text-[9px] font-black text-white">✓</span>
+                  {group.verified && <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success text-[9px] font-black text-white">✓</span>}
                 </div>
 
-                <p className="mt-0.5 truncate text-[10px] text-muted">@gamingteam • 128 عضو • 34 آنلاین</p>
+                <p className="mt-0.5 truncate text-[10px] text-muted">
+                  @{group.username} • {group.members} عضو • {group.online} آنلاین
+                </p>
               </div>
             </button>
 
@@ -226,6 +445,14 @@ export default function GroupPage() {
                 aria-label="جستجو"
               >
                 <FiSearch size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setNotifications((value) => !value)}
+                aria-label="اعلان‌ها"
+                className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${notifications ? "text-primary hover:bg-primary/10" : "text-muted hover:bg-surface-hover"}`}
+              >
+                {notifications ? <FiBell size={18} /> : <FiBellOff size={18} />}
               </button>
 
               <button
@@ -265,7 +492,7 @@ export default function GroupPage() {
                   type="text"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="جستجو در پیام‌های گروه..."
+                  placeholder={`جستجو در پیام‌های ${group.name}...`}
                   className="h-11 w-full rounded-xl border border-border bg-background-secondary pr-10 pl-4 text-xs outline-none transition focus:border-primary"
                 />
 
@@ -305,8 +532,6 @@ export default function GroupPage() {
               <GroupMenuButton icon={<FiLink size={16} />} title="لینک دعوت گروه" onClick={() => setMenuOpen(false)} />
 
               <GroupMenuButton icon={<FiVolume2 size={16} />} title="تنظیمات اعلان‌ها" onClick={() => setMenuOpen(false)} />
-
-              <GroupMenuButton icon={<FiMoreHorizontal size={16} />} title="گزینه‌های بیشتر" onClick={() => setMenuOpen(false)} />
             </div>
           )}
         </header>
@@ -320,9 +545,9 @@ export default function GroupPage() {
           <div className="relative mx-auto max-w-4xl">
             <div className="mb-6 flex justify-center">
               <div className="rounded-2xl border border-primary/15 bg-primary/5 px-5 py-3 text-center">
-                <p className="text-xs font-bold text-primary">Gaming Team</p>
+                <p className="text-xs font-bold text-primary">{group.name}</p>
 
-                <p className="mt-1 text-[10px] text-muted">به گروه گیمرهای NexUs خوش آمدید</p>
+                <p className="mt-1 text-[10px] text-muted">{group.description}</p>
               </div>
             </div>
 
@@ -384,7 +609,7 @@ export default function GroupPage() {
                   }
                 }}
                 rows={1}
-                placeholder="پیامی برای گروه بنویس..."
+                placeholder={`پیامی برای ${group.name} بنویس...`}
                 className="max-h-32 min-h-11 w-full resize-none bg-transparent px-4 py-3 pl-11 text-sm leading-6 outline-none placeholder:text-muted"
               />
 
@@ -447,15 +672,15 @@ export default function GroupPage() {
                     </div>
 
                     <div>
-                      <p className="font-bold">128 عضو</p>
+                      <p className="font-bold">{group.members} عضو</p>
 
-                      <p className="mt-1 text-xs text-success">34 نفر آنلاین</p>
+                      <p className="mt-1 text-xs text-success">{group.online} نفر آنلاین</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  {members.map((member) => (
+                  {group.membersList.map((member) => (
                     <div key={member.username} className="flex items-center gap-3 rounded-2xl border border-border bg-surface/50 p-3">
                       <div className="relative">
                         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 font-black text-primary">{member.avatar}</div>
@@ -481,31 +706,31 @@ export default function GroupPage() {
             ) : (
               <div className="flex-1 overflow-y-auto">
                 <div className="border-b border-border p-6 text-center">
-                  <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br from-primary/30 to-primary/5 text-xl font-black text-primary">GT</div>
+                  <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br from-primary/30 to-primary/5 text-xl font-black text-primary">{group.avatar}</div>
 
-                  <h3 className="mt-4 text-lg font-black">Gaming Team</h3>
+                  <h3 className="mt-4 text-lg font-black">{group.name}</h3>
 
-                  <p className="mt-1 text-xs text-primary">@gamingteam</p>
+                  <p className="mt-1 text-xs text-primary">@{group.username}</p>
 
-                  <p className="mt-4 text-xs leading-6 text-muted">تیم اصلی گیمرهای NexUs برای بازی، گفتگو و ساخت تیم‌های مختلف.</p>
+                  <p className="mt-4 text-xs leading-6 text-muted">{group.description}</p>
                 </div>
 
                 <div className="space-y-2 p-4">
                   <InfoRow
                     icon={<FiUsers size={17} />}
                     title="اعضا"
-                    value="128 عضو"
+                    value={`${group.members} عضو`}
                     onClick={() => {
                       setInfoOpen(false);
                       setMembersOpen(true);
                     }}
                   />
 
-                  <InfoRow icon={<FiLink size={17} />} title="نام کاربری گروه" value="@gamingteam" />
+                  <InfoRow icon={<FiHash size={17} />} title="نام کاربری گروه" value={`@${group.username}`} />
 
                   <InfoRow icon={<FiVolume2 size={17} />} title="اعلان‌ها" value="فعال" />
 
-                  <InfoRow icon={<FiInfo size={17} />} title="نوع گروه" value="عمومی" />
+                  <InfoRow icon={<FiInfo size={17} />} title="نوع گروه" value={group.type} />
                 </div>
               </div>
             )}
@@ -524,7 +749,7 @@ function GroupMessage({ message }: { message: Message }) {
       <div className={`flex max-w-[90%] items-end gap-2 sm:max-w-[72%] ${isMe ? "flex-row-reverse" : "flex-row"}`}>
         {!isMe && <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-black text-primary sm:flex">{message.avatar}</div>}
 
-        <div className={`min-w-0 ${isMe ? "items-start" : "items-end"} flex flex-col`}>
+        <div className={`flex min-w-0 flex-col ${isMe ? "items-start" : "items-end"}`}>
           {!isMe && <span className="mb-1 px-1 text-[10px] font-bold text-primary">{message.name}</span>}
 
           <div className={`rounded-2xl px-4 py-2.5 ${isMe ? "rounded-bl-md bg-primary text-background" : "rounded-br-md border border-border bg-surface/80"}`}>

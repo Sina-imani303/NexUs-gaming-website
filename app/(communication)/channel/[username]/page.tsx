@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { use, useState } from "react";
 import { FiArrowRight, FiBell, FiBellOff, FiCheck, FiCopy, FiHeart, FiMessageCircle, FiMoreVertical, FiSearch, FiShare2, FiVolume2 } from "react-icons/fi";
 
 type Message = {
@@ -14,55 +14,178 @@ type Message = {
   image?: boolean;
 };
 
-const messages: Message[] = [
-  {
-    id: 1,
-    text: "به NΞXUS خوش آمدید 🎮\nاینجا جدیدترین اخبار، اطلاعیه‌ها، مسابقات و اتفاقات مهم پلتفرم را منتشر می‌کنیم.",
-    time: "20:18",
-    views: 2840,
-    likes: 428,
-    comments: 67,
-  },
-  {
-    id: 2,
-    text: "آپدیت جدید NΞXUS منتشر شد.\nامکانات جدید بخش ارتباطات، بازی‌ها و پروفایل کاربران در دسترس قرار گرفت.",
-    time: "18:42",
-    views: 5210,
-    likes: 812,
-    comments: 124,
-    image: true,
-  },
-  {
-    id: 3,
-    text: "🎮 مسابقه جدید شروع شد!\nبا شرکت در چالش‌های این هفته می‌توانید NEX COIN دریافت کنید.",
-    time: "16:30",
-    views: 3180,
-    likes: 531,
-    comments: 83,
-  },
-  {
-    id: 4,
-    text: "به‌زودی بازی‌های جدیدی به بخش بازی‌های NΞXUS اضافه خواهند شد.",
-    time: "14:15",
-    views: 1960,
-    likes: 274,
-    comments: 31,
-  },
-];
+type Channel = {
+  username: string;
+  name: string;
+  avatar: string;
+  members: number;
+  online: number;
+  verified: boolean;
+  description: string;
+  messages: Message[];
+};
 
-export default function ChannelPage() {
+const channels: Record<string, Channel> = {
+  nexus: {
+    username: "nexus",
+    name: "NexUs Official",
+    avatar: "N",
+    members: 18420,
+    online: 3260,
+    verified: true,
+    description: "کانال رسمی NexUs برای انتشار اخبار، اطلاعیه‌ها و اتفاقات مهم پلتفرم.",
+    messages: [
+      {
+        id: 1,
+        text: "به NΞXUS خوش آمدید 🎮\nاینجا جدیدترین اخبار، اطلاعیه‌ها، مسابقات و اتفاقات مهم پلتفرم را منتشر می‌کنیم.",
+        time: "20:18",
+        views: 2840,
+        likes: 428,
+        comments: 67,
+      },
+      {
+        id: 2,
+        text: "آپدیت جدید NΞXUS منتشر شد.\nامکانات جدید بخش ارتباطات، بازی‌ها و پروفایل کاربران در دسترس قرار گرفت.",
+        time: "18:42",
+        views: 5210,
+        likes: 812,
+        comments: 124,
+        image: true,
+      },
+      {
+        id: 3,
+        text: "🎮 مسابقه جدید شروع شد!\nبا شرکت در چالش‌های این هفته می‌توانید NEX COIN دریافت کنید.",
+        time: "16:30",
+        views: 3180,
+        likes: 531,
+        comments: 83,
+      },
+      {
+        id: 4,
+        text: "به‌زودی بازی‌های جدیدی به بخش بازی‌های NΞXUS اضافه خواهند شد.",
+        time: "14:15",
+        views: 1960,
+        likes: 274,
+        comments: 31,
+      },
+    ],
+  },
+
+  nexusnews: {
+    username: "nexusnews",
+    name: "NexUs News",
+    avatar: "N",
+    members: 12640,
+    online: 2180,
+    verified: true,
+    description: "جدیدترین اخبار و آپدیت‌های NexUs را از این کانال دنبال کنید.",
+    messages: [
+      {
+        id: 101,
+        text: "📰 جدیدترین اخبار NexUs\nآخرین تغییرات و اتفاقات پلتفرم را اینجا دنبال کنید.",
+        time: "16:20",
+        views: 2840,
+        likes: 412,
+        comments: 58,
+      },
+      {
+        id: 102,
+        text: "آپدیت جدید NexUs منتشر شد.\nچند قابلیت جدید به بخش ارتباطات اضافه شده است.",
+        time: "15:10",
+        views: 4210,
+        likes: 620,
+        comments: 94,
+        image: true,
+      },
+      {
+        id: 103,
+        text: "سیستم پروفایل کاربران به‌روزرسانی شد و امکانات جدیدی در دسترس قرار گرفت.",
+        time: "13:45",
+        views: 3120,
+        likes: 488,
+        comments: 61,
+      },
+    ],
+  },
+
+  gamingnews: {
+    username: "gamingnews",
+    name: "Gaming News",
+    avatar: "G",
+    members: 9820,
+    online: 1740,
+    verified: false,
+    description: "اخبار جدید دنیای گیم، مسابقات و اتفاقات مهم بازی‌ها.",
+    messages: [
+      {
+        id: 201,
+        text: "🎮 اخبار جدید دنیای گیم\nجدیدترین اتفاقات و اخبار بازی‌ها را دنبال کنید.",
+        time: "14:45",
+        views: 3520,
+        likes: 610,
+        comments: 87,
+      },
+      {
+        id: 202,
+        text: "مسابقات جدید این هفته شروع شدند.\nتیم خودت را آماده کن!",
+        time: "13:20",
+        views: 4180,
+        likes: 724,
+        comments: 112,
+        image: true,
+      },
+      {
+        id: 203,
+        text: "بازی‌های جدیدی در راه هستند و به‌زودی اطلاعات بیشتری منتشر خواهد شد.",
+        time: "11:50",
+        views: 2360,
+        likes: 341,
+        comments: 45,
+      },
+    ],
+  },
+
+  gaming: {
+    username: "gaming",
+    name: "Gaming News",
+    avatar: "G",
+    members: 9820,
+    online: 1740,
+    verified: false,
+    description: "اخبار جدید دنیای گیم، مسابقات و اتفاقات مهم بازی‌ها.",
+    messages: [
+      {
+        id: 301,
+        text: "🎮 اخبار جدید دنیای گیم\nجدیدترین اتفاقات و اخبار بازی‌ها را دنبال کنید.",
+        time: "14:45",
+        views: 3520,
+        likes: 610,
+        comments: 87,
+      },
+      {
+        id: 302,
+        text: "مسابقات جدید این هفته شروع شدند.\nتیم خودت را آماده کن!",
+        time: "13:20",
+        views: 4180,
+        likes: 724,
+        comments: 112,
+        image: true,
+      },
+    ],
+  },
+};
+
+export default function ChannelPage({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = use(params);
+
+  const normalizedUsername = username?.toLowerCase().replace(/^@/, "");
+
+  const channel = channels[normalizedUsername] ?? channels.nexus;
+
   const [joined, setJoined] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [likedPosts, setLikedPosts] = useState<number[]>([]);
-
-  const channel = {
-    name: "NexUs Official",
-    username: "@nexus",
-    members: 18420,
-    online: 3260,
-    verified: true,
-  };
 
   const toggleLike = (id: number) => {
     setLikedPosts((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
@@ -72,11 +195,11 @@ export default function ChannelPage() {
     <main dir="rtl" className="font-vazir h-screen w-full overflow-hidden bg-background text-foreground">
       <div className="flex h-screen w-full flex-col bg-background">
         <header className="relative z-50 flex h-17 shrink-0 items-center border-b border-border bg-background/95 px-3 backdrop-blur-xl sm:px-5">
-          <Link href="/chat" aria-label="بازگشت" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted transition hover:bg-surface-hover hover:text-primary">
+          <Link href="/channel" aria-label="بازگشت" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted transition hover:bg-surface-hover hover:text-primary">
             <FiArrowRight size={20} />
           </Link>
 
-          <div className="mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-lg font-black text-primary">N</div>
+          <div className="mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-lg font-black text-primary">{channel.avatar}</div>
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
@@ -145,16 +268,16 @@ export default function ChannelPage() {
           <div className="relative flex-1 overflow-y-auto px-2 py-4 sm:px-4">
             <div className="mx-auto flex w-full max-w-5xl flex-col gap-1">
               <div className="mb-3 flex justify-center">
-                <div className="rounded-full border border-border bg-surface/80 px-3 py-1 text-[9px] text-muted backdrop-blur-xl">کانال رسمی NΞXUS</div>
+                <div className="rounded-full border border-border bg-surface/80 px-3 py-1 text-[9px] text-muted backdrop-blur-xl">{channel.name}</div>
               </div>
 
-              {messages.map((message) => {
+              {channel.messages.map((message) => {
                 const liked = likedPosts.includes(message.id);
 
                 return (
                   <article key={message.id} className="flex w-full justify-start">
                     <div className="flex max-w-[92%] items-start gap-2 sm:max-w-[75%]">
-                      <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-black text-primary">N</div>
+                      <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-black text-primary">{channel.avatar}</div>
 
                       <div className="min-w-0">
                         <div className="mb-1 flex items-center gap-1.5 px-1">

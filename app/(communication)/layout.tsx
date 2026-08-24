@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { FiBell, FiHash, FiMenu, FiMessageCircle, FiSearch, FiUsers, FiVolume2 } from "react-icons/fi";
+import { FiBell, FiHash, FiMessageCircle, FiSearch, FiUsers } from "react-icons/fi";
 
 type Tab = "chats" | "groups" | "channels";
 
@@ -56,7 +56,6 @@ const conversations: Conversation[] = [
     type: "private",
     color: "from-cyan-500/20 to-primary/10",
   },
-
   {
     id: "gaming-team",
     name: "Gaming Team",
@@ -90,7 +89,6 @@ const conversations: Conversation[] = [
     icon: "FR",
     color: "from-green-500/20 to-primary/10",
   },
-
   {
     id: "nexus-news",
     name: "NexUs News",
@@ -146,56 +144,79 @@ const tabs = [
   },
 ];
 
-export default function ChatPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("chats");
+export default function CommunicationLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    if (pathname.startsWith("/group")) {
+      return "groups";
+    }
+
+    if (pathname.startsWith("/channel")) {
+      return "channels";
+    }
+
+    return "chats";
+  });
 
   const filteredConversations = useMemo(() => {
-    return conversations.filter((conversation) => {
-      if (activeTab === "chats") {
-        return conversation.type === "private";
-      }
+    if (activeTab === "chats") {
+      return conversations.filter((conversation) => conversation.type === "private");
+    }
 
-      if (activeTab === "groups") {
-        return conversation.type === "group";
-      }
+    if (activeTab === "groups") {
+      return conversations.filter((conversation) => conversation.type === "group");
+    }
 
-      return conversation.type === "channel";
-    });
+    return conversations.filter((conversation) => conversation.type === "channel");
   }, [activeTab]);
 
   const unreadTotal = conversations.reduce((total, conversation) => total + conversation.unread, 0);
 
+  const openConversation = (conversation: Conversation) => {
+    if (conversation.type === "private") {
+      router.push(`/chat/${conversation.id}`);
+      return;
+    }
+
+    const username = conversation.username?.replace(/^@/, "");
+
+    if (!username) {
+      return;
+    }
+
+    if (conversation.type === "group") {
+      router.push(`/group/${username}`);
+      return;
+    }
+
+    if (conversation.type === "channel") {
+      router.push(`/channel/${username}`);
+    }
+  };
+
   return (
-    <main dir="rtl" className="font-vazir min-h-screen bg-background px-0 py-0 text-foreground">
-      <Link
-        href="/dashboard"
-        aria-label="داشبورد"
-        title="داشبورد"
-        className="fixed left-4 top-4 z-100 flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface/80 text-muted shadow-lg backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary hover:bg-primary/10 hover:text-primary active:scale-95 sm:left-6 sm:top-6"
-      >
-        <FiMenu size={21} />
-      </Link>
-
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px] overflow-hidden border-x border-border bg-background">
-        <section className="flex min-h-screen w-full flex-col lg:w-97.5 lg:shrink-0 lg:border-l lg:border-border">
-          <header className="border-b border-border px-4 pb-4 pt-5 sm:px-5">
+    <div dir="rtl" className="min-h-screen overflow-hidden bg-background text-foreground">
+      <div className="flex min-h-screen w-full">
+        <aside className="fixed inset-y-0 right-0 z-40 flex w-full max-w-107.5 flex-col border-l border-border bg-background">
+          <header className="shrink-0 border-b border-border px-4 pb-4 pt-5 sm:px-5">
             <div className="flex items-center justify-between gap-3">
-              <div className="pr-14 sm:pr-12">
-                <p className="text-xs font-bold tracking-[3px] text-primary">NΞXUS</p>
-
-                <h1 className="mt-1 text-xl font-black text-foreground">ارتباطات</h1>
-              </div>
+              <Link href="/" className="text-2xl font-black tracking-[4px] text-primary">
+                NΞXUS
+              </Link>
 
               <Link
                 href="/notifications"
                 aria-label="اعلان‌ها"
-                className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface/60 text-muted transition-all duration-300 hover:border-primary hover:text-primary"
+                className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface/60 text-muted transition hover:border-primary hover:text-primary"
               >
                 <FiBell size={18} />
 
                 {unreadTotal > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />}
               </Link>
             </div>
+
             <Link href="/chat/search" className="group relative mt-5 block">
               <FiSearch size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted transition-colors group-hover:text-primary" />
 
@@ -203,7 +224,8 @@ export default function ChatPage() {
                 جستجوی گفتگو یا کاربر...
               </div>
             </Link>
-            <div className="mt-4 hidden grid-cols-3 gap-1 rounded-2xl bg-background-secondary/70 p-1 sm:grid">
+
+            <div className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-background-secondary/70 p-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const active = activeTab === tab.id;
@@ -213,7 +235,7 @@ export default function ChatPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex h-10 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold transition-all duration-300 ${
+                    className={`flex h-10 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold transition-all ${
                       active ? "bg-primary text-background shadow-sm" : "text-muted hover:text-foreground"
                     }`}
                   >
@@ -224,15 +246,45 @@ export default function ChatPage() {
               })}
             </div>
           </header>
-          <div className="flex-1 overflow-y-auto px-2 pb-24 pt-2 sm:p-3 sm:pb-3">
+
+          <div className="flex-1 overflow-y-auto px-2 pb-24 pt-2 sm:p-3">
             {filteredConversations.length > 0 ? (
               <div className="space-y-1">
                 {filteredConversations.map((conversation) => (
-                  <ConversationItem key={conversation.id} conversation={conversation} />
+                  <button
+                    key={conversation.id}
+                    type="button"
+                    onClick={() => openConversation(conversation)}
+                    className="group flex w-full items-center gap-3 rounded-2xl p-3 text-right transition-all hover:bg-surface-hover active:scale-[0.99]"
+                  >
+                    <ConversationAvatar conversation={conversation} />
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <h2 className="truncate text-sm font-bold text-foreground">{conversation.name}</h2>
+
+                          {conversation.verified && <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success text-[9px] font-black text-white">✓</span>}
+                        </div>
+
+                        <span className="shrink-0 text-[10px] text-muted">{conversation.time}</span>
+                      </div>
+
+                      <div className="mt-1 flex items-center gap-2">
+                        <p className="min-w-0 flex-1 truncate text-xs text-muted">{conversation.message}</p>
+
+                        {conversation.unread > 0 && (
+                          <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[9px] font-black text-background">
+                            {conversation.unread > 99 ? "99+" : conversation.unread}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </button>
                 ))}
               </div>
             ) : (
-              <div className="flex min-h-87.5 flex-col items-center justify-center px-6 text-center">
+              <div className="flex min-h-80 flex-col items-center justify-center px-6 text-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <FiSearch size={22} />
                 </div>
@@ -243,8 +295,9 @@ export default function ChatPage() {
               </div>
             )}
           </div>
-          <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 p-2 backdrop-blur-2xl sm:hidden">
-            <div className="mx-auto grid max-w-md grid-cols-3 gap-1 rounded-2xl bg-surface/60 p-1">
+
+          <nav className="absolute bottom-0 left-0 right-0 border-t border-border bg-background/95 p-2 backdrop-blur-2xl sm:hidden">
+            <div className="grid grid-cols-3 gap-1 rounded-2xl bg-surface/60 p-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const active = activeTab === tab.id;
@@ -254,7 +307,7 @@ export default function ChatPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-all duration-300 ${
+                    className={`flex h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-all ${
                       active ? "bg-primary text-background shadow-sm" : "text-muted hover:text-foreground"
                     }`}
                   >
@@ -265,87 +318,11 @@ export default function ChatPage() {
               })}
             </div>
           </nav>
-        </section>
+        </aside>
 
-        <section className="hidden min-h-screen flex-1 lg:flex">
-          <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-8 text-center">
-            <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-primary/10 blur-[140px]" />
-
-            <div className="pointer-events-none absolute -bottom-40 -right-32 h-96 w-96 rounded-full bg-primary/5 blur-[140px]" />
-
-            <div className="relative">
-              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl border border-primary/20 bg-primary/10 text-primary shadow-[0_0_70px_rgba(212,175,55,.08)]">
-                <FiMessageCircle size={38} />
-              </div>
-
-              <h2 className="mt-7 text-2xl font-black text-foreground">به NΞXUS خوش آمدی</h2>
-
-              <p className="mx-auto mt-3 max-w-lg text-sm leading-8 text-muted">یک گفتگو را انتخاب کن یا برای پیدا کردن کاربر موردنظر از جستجو استفاده کن.</p>
-            </div>
-          </div>
-        </section>
+        <main className="min-h-screen w-full pr-0 lg:pr-107.5">{children}</main>
       </div>
-    </main>
-  );
-}
-
-function ConversationItem({ conversation }: { conversation: Conversation }) {
-  const router = useRouter();
-
-  const handleOpen = () => {
-    if (conversation.type === "private") {
-      router.push(`/chat/${conversation.id}`);
-      return;
-    }
-
-    if (conversation.type === "group") {
-      const username = conversation.username?.replace(/^@/, "");
-
-      if (!username) {
-        return;
-      }
-
-      router.push(`/group/${username}`);
-      return;
-    }
-
-    if (conversation.type === "channel") {
-      const username = conversation.username?.replace(/^@/, "");
-
-      if (!username) {
-        return;
-      }
-
-      router.push(`/channel/${username}`);
-    }
-  };
-
-  return (
-    <button type="button" onClick={handleOpen} className="group flex w-full items-center gap-3 rounded-2xl p-3 text-right transition-all duration-300 hover:bg-surface-hover active:scale-[0.99]">
-      <ConversationAvatar conversation={conversation} />
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-1.5">
-            <h2 className="truncate text-sm font-bold text-foreground">{conversation.name}</h2>
-
-            {conversation.verified && <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success text-[9px] font-black text-white">✓</span>}
-          </div>
-
-          <span className="shrink-0 text-[10px] text-muted">{conversation.time}</span>
-        </div>
-
-        <div className="mt-1 flex items-center gap-2">
-          <p className="min-w-0 flex-1 truncate text-xs text-muted">{conversation.message}</p>
-
-          {conversation.unread > 0 && (
-            <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[9px] font-black text-background">
-              {conversation.unread > 99 ? "99+" : conversation.unread}
-            </span>
-          )}
-        </div>
-      </div>
-    </button>
+    </div>
   );
 }
 
@@ -365,7 +342,7 @@ function ConversationAvatar({ conversation }: { conversation: Conversation }) {
   if (conversation.type === "channel") {
     return (
       <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br ${conversation.color} text-xs font-black text-primary`}>
-        <FiVolume2 size={18} />
+        <span className="text-lg">◖</span>
       </div>
     );
   }
