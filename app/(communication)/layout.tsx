@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { FiBell, FiHash, FiMessageCircle, FiSearch, FiUsers } from "react-icons/fi";
+import { FiBell, FiHash, FiMenu, FiMessageCircle, FiMoreVertical, FiSearch, FiSun, FiMoon, FiUsers } from "react-icons/fi";
 
 type Tab = "chats" | "groups" | "channels";
 
@@ -149,87 +149,172 @@ export default function CommunicationLayout({ children }: { children: React.Reac
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<Tab>(() => {
-    if (pathname.startsWith("/group")) {
+    if (pathname?.startsWith("/group")) {
       return "groups";
     }
-
-    if (pathname.startsWith("/channel")) {
+    if (pathname?.startsWith("/channel")) {
       return "channels";
     }
-
     return "chats";
   });
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark");
+    }
+    return true;
+  });
+
+  const toggleTheme = () => {
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+    if (newIsDark) {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+    } else {
+      document.documentElement.classList.add("light");
+      document.documentElement.classList.remove("dark");
+    }
+    setMenuOpen(false);
+  };
+
   const filteredConversations = useMemo(() => {
     if (activeTab === "chats") {
-      return conversations.filter((conversation) => conversation.type === "private");
+      return conversations.filter((c) => c.type === "private");
     }
-
     if (activeTab === "groups") {
-      return conversations.filter((conversation) => conversation.type === "group");
+      return conversations.filter((c) => c.type === "group");
     }
-
-    return conversations.filter((conversation) => conversation.type === "channel");
+    return conversations.filter((c) => c.type === "channel");
   }, [activeTab]);
 
-  const unreadTotal = conversations.reduce((total, conversation) => total + conversation.unread, 0);
+  const unreadTotal = conversations.reduce((total, c) => total + c.unread, 0);
 
   const openConversation = (conversation: Conversation) => {
     if (conversation.type === "private") {
       router.push(`/chat/${conversation.id}`);
       return;
     }
-
     const username = conversation.username?.replace(/^@/, "");
-
-    if (!username) {
-      return;
-    }
-
+    if (!username) return;
     if (conversation.type === "group") {
       router.push(`/group/${username}`);
       return;
     }
-
     if (conversation.type === "channel") {
       router.push(`/channel/${username}`);
     }
   };
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
   return (
-    <div dir="rtl" className="min-h-screen overflow-hidden bg-background text-foreground">
-      <div className="flex min-h-screen w-full">
-        <aside className="fixed inset-y-0 right-0 z-40 flex w-full max-w-107.5 flex-col border-l border-border bg-background">
+    <div dir="rtl" className="h-screen overflow-hidden bg-background text-foreground">
+      <div className="flex h-full w-full">
+        <aside
+          className={`flex h-full w-full flex-col border-l border-border bg-background ${
+            isMobile && pathname !== "/chat" && pathname !== "/group" && pathname !== "/channel" ? "hidden" : "flex"
+          } sm:flex max-w-100`}
+        >
           <header className="shrink-0 border-b border-border px-4 pb-4 pt-5 sm:px-5">
-            <div className="flex items-center justify-between gap-3">
+            {/* حالت موبایل */}
+            <div className="flex items-center justify-between gap-3 sm:hidden">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen((value) => !value)}
+                  aria-label="منوی بیشتر"
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl border bg-surface/80 shadow-lg backdrop-blur-xl transition-all duration-300 ${
+                    menuOpen ? "border-primary bg-primary/10 text-primary" : "border-border text-muted hover:border-primary hover:bg-primary/10 hover:text-primary"
+                  }`}
+                >
+                  <FiMoreVertical size={20} />
+                </button>
+
+                {menuOpen && (
+                  <>
+                    <button type="button" aria-label="بستن منو" onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 cursor-default" />
+
+                    <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-2xl border border-border bg-surface/95 p-1.5 shadow-2xl backdrop-blur-2xl">
+                      <button
+                        type="button"
+                        onClick={toggleTheme}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground transition hover:bg-surface-hover hover:text-primary"
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">{isDark ? <FiSun size={16} /> : <FiMoon size={16} />}</div>
+                        <span className="flex-1 text-right">{isDark ? "حالت لایت" : "حالت دارک"}</span>
+                      </button>
+
+                      <div className="my-1 h-px bg-border" />
+
+                      <Link
+                        href="/group/create"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground transition hover:bg-surface-hover hover:text-primary"
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <FiUsers size={16} />
+                        </div>
+                        <span className="flex-1 text-right">ایجاد گروه</span>
+                      </Link>
+
+                      <Link
+                        href="/channel/create"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground transition hover:bg-surface-hover hover:text-primary"
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <FiHash size={16} />
+                        </div>
+                        <span className="flex-1 text-right">ایجاد کانال</span>
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <Link href="/" className="text-2xl font-black tracking-[4px] text-primary">
+                NΞXUS
+              </Link>
+
+              <Link
+                href="/dashboard"
+                aria-label="داشبورد"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface/80 text-muted shadow-lg backdrop-blur-xl transition-all duration-300 hover:border-primary hover:bg-primary/10 hover:text-primary"
+              >
+                <FiMenu size={21} />
+              </Link>
+            </div>
+
+            {/* حالت دسکتاپ و تبلت */}
+            <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-3">
               <Link href="/" className="text-2xl font-black tracking-[4px] text-primary">
                 NΞXUS
               </Link>
 
               <Link
                 href="/notifications"
-                aria-label="اعلان‌ها"
                 className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface/60 text-muted transition hover:border-primary hover:text-primary"
               >
                 <FiBell size={18} />
-
                 {unreadTotal > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />}
               </Link>
             </div>
 
-            <Link href="/chat/search" className="group relative mt-5 block">
-              <FiSearch size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted transition-colors group-hover:text-primary" />
+            <div className="relative mt-5">
+              <FiSearch size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                type="text"
+                placeholder="جستجوی گفتگو یا کاربر..."
+                className="h-12 w-full rounded-2xl border border-border bg-background-secondary pr-11 pl-4 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+              />
+            </div>
 
-              <div className="flex h-12 w-full items-center rounded-2xl border border-border bg-background-secondary pr-11 pl-4 text-sm text-muted transition-all duration-300 group-hover:border-primary group-hover:ring-4 group-hover:ring-primary/10">
-                جستجوی گفتگو یا کاربر...
-              </div>
-            </Link>
-
-            <div className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-background-secondary/70 p-1">
+            <div className="mt-4 hidden grid-cols-3 gap-1 rounded-2xl bg-background-secondary/70 p-1 sm:grid">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const active = activeTab === tab.id;
-
                 return (
                   <button
                     key={tab.id}
@@ -258,21 +343,16 @@ export default function CommunicationLayout({ children }: { children: React.Reac
                     className="group flex w-full items-center gap-3 rounded-2xl p-3 text-right transition-all hover:bg-surface-hover active:scale-[0.99]"
                   >
                     <ConversationAvatar conversation={conversation} />
-
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex min-w-0 items-center gap-1.5">
                           <h2 className="truncate text-sm font-bold text-foreground">{conversation.name}</h2>
-
                           {conversation.verified && <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success text-[9px] font-black text-white">✓</span>}
                         </div>
-
                         <span className="shrink-0 text-[10px] text-muted">{conversation.time}</span>
                       </div>
-
                       <div className="mt-1 flex items-center gap-2">
                         <p className="min-w-0 flex-1 truncate text-xs text-muted">{conversation.message}</p>
-
                         {conversation.unread > 0 && (
                           <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[9px] font-black text-background">
                             {conversation.unread > 99 ? "99+" : conversation.unread}
@@ -288,20 +368,17 @@ export default function CommunicationLayout({ children }: { children: React.Reac
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <FiSearch size={22} />
                 </div>
-
                 <h2 className="mt-4 font-bold text-foreground">چیزی پیدا نشد</h2>
-
                 <p className="mt-2 text-xs leading-6 text-muted">هنوز گفتگویی در این بخش وجود ندارد.</p>
               </div>
             )}
           </div>
 
-          <nav className="absolute bottom-0 left-0 right-0 border-t border-border bg-background/95 p-2 backdrop-blur-2xl sm:hidden">
+          <nav className="block shrink-0 border-t border-border bg-background/95 p-2 backdrop-blur-2xl sm:hidden">
             <div className="grid grid-cols-3 gap-1 rounded-2xl bg-surface/60 p-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const active = activeTab === tab.id;
-
                 return (
                   <button
                     key={tab.id}
@@ -320,7 +397,7 @@ export default function CommunicationLayout({ children }: { children: React.Reac
           </nav>
         </aside>
 
-        <main className="min-h-screen w-full pr-0 lg:pr-107.5">{children}</main>
+        <main className="flex-1 overflow-hidden">{children}</main>
       </div>
     </div>
   );
@@ -333,7 +410,6 @@ function ConversationAvatar({ conversation }: { conversation: Conversation }) {
         <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br ${conversation.color} text-base font-black text-primary`}>
           {conversation.name.charAt(0).toUpperCase()}
         </div>
-
         {conversation.online && <span className="absolute bottom-0 left-0 h-3.5 w-3.5 rounded-full border-2 border-background bg-success" />}
       </div>
     );

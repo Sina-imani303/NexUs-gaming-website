@@ -4,13 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { FiBell, FiChevronLeft, FiHeadphones, FiHome, FiLogOut, FiMenu, FiPlay, FiSettings, FiUser, FiUsers, FiX } from "react-icons/fi";
+import { FiBell, FiChevronLeft, FiGrid, FiHeadphones, FiHome, FiLogOut, FiMenu, FiPlay, FiSettings, FiUser, FiUsers, FiX } from "react-icons/fi";
 
 const navigation = [
   {
+    name: "خانه",
+    href: "/feed",
+    icon: FiHome,
+  },
+
+  {
     name: "داشبورد",
     href: "/dashboard",
-    icon: FiHome,
+    icon: FiGrid,
   },
   {
     name: "پروفایل",
@@ -77,7 +83,7 @@ export default function DashboardLayout({
           </Link>
 
           <Link
-            href="/"
+            href="/chat"
             aria-label="خروج از داشبورد"
             title="خروج از داشبورد"
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/15 bg-red-500/5 text-red-400 transition-all hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-300"

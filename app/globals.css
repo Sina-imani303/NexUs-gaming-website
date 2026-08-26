@@ -132,3 +132,17 @@ select {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary);
 }
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+body {
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}

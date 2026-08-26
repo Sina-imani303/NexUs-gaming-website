@@ -98,8 +98,6 @@ export default function DashboardPage() {
       <div className="mx-auto w-full max-w-7xl">
         <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="mb-1.5 text-xs font-medium text-primary sm:mb-2 sm:text-sm">داشبورد NexUs</p>
-
             <h1 className="truncate text-xl font-black text-foreground sm:text-2xl md:text-3xl">سلام jaki 👋</h1>
 
             <p className="mt-1.5 text-xs leading-6 text-foreground-secondary sm:mt-2 sm:text-sm sm:leading-7">آماده‌ای امروز یه بازی خوب داشته باشی؟</p>

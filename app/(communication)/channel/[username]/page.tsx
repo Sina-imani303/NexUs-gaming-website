@@ -195,7 +195,7 @@ export default function ChannelPage({ params }: { params: Promise<{ username: st
     <main dir="rtl" className="font-vazir h-screen w-full overflow-hidden bg-background text-foreground">
       <div className="flex h-screen w-full flex-col bg-background">
         <header className="relative z-50 flex h-17 shrink-0 items-center border-b border-border bg-background/95 px-3 backdrop-blur-xl sm:px-5">
-          <Link href="/channel" aria-label="بازگشت" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted transition hover:bg-surface-hover hover:text-primary">
+          <Link href="/chat" aria-label="بازگشت" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted transition hover:bg-surface-hover hover:text-primary">
             <FiArrowRight size={20} />
           </Link>
 
@@ -266,7 +266,7 @@ export default function ChannelPage({ params }: { params: Promise<{ username: st
 
         <section className="flex min-h-0 flex-1 flex-col">
           <div className="relative flex-1 overflow-y-auto px-2 py-4 sm:px-4">
-            <div className="mx-auto flex w-full max-w-5xl flex-col gap-1">
+            <div className="mx-auto flex w-full max-w-3xl flex-col gap-1">
               <div className="mb-3 flex justify-center">
                 <div className="rounded-full border border-border bg-surface/80 px-3 py-1 text-[9px] text-muted backdrop-blur-xl">{channel.name}</div>
               </div>
@@ -276,7 +276,7 @@ export default function ChannelPage({ params }: { params: Promise<{ username: st
 
                 return (
                   <article key={message.id} className="flex w-full justify-start">
-                    <div className="flex max-w-[92%] items-start gap-2 sm:max-w-[75%]">
+                    <div className="flex max-w-[92%] items-start gap-2 sm:max-w-[80%]">
                       <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-black text-primary">{channel.avatar}</div>
 
                       <div className="min-w-0">
@@ -347,31 +347,31 @@ export default function ChannelPage({ params }: { params: Promise<{ username: st
           </div>
 
           <div className="shrink-0 border-t border-border bg-background/95 p-2.5 backdrop-blur-xl sm:p-3">
-            <div className="mx-auto flex w-full max-w-5xl items-center gap-2">
+            <div className="mx-auto flex w-full max-w-3xl items-center gap-2">
               {!joined ? (
                 <button
                   type="button"
                   onClick={() => setJoined(true)}
-                  className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-xs font-black text-background transition hover:bg-primary-hover"
+                  className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary text-xs font-bold text-background transition hover:bg-primary-hover"
                 >
-                  <FiVolume2 size={16} />
+                  <FiVolume2 size={14} />
                   عضویت در کانال
                 </button>
               ) : (
                 <>
-                  <div className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-surface/60 text-xs text-muted">
-                    <FiBell size={15} />
+                  <div className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-surface/60 text-[10px] text-muted">
+                    <FiBell size={13} />
                     فقط مدیران می‌توانند پیام ارسال کنند
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setNotifications((value) => !value)}
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition ${
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition ${
                       notifications ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-surface text-muted"
                     }`}
                   >
-                    {notifications ? <FiBell size={16} /> : <FiBellOff size={16} />}
+                    {notifications ? <FiBell size={14} /> : <FiBellOff size={14} />}
                   </button>
                 </>
               )}

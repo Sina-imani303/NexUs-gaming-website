@@ -28,7 +28,7 @@ export default function Home() {
       }
 
       setProgress(100);
-      router.replace("/chat");
+      router.replace("/feed");
     };
 
     frame = requestAnimationFrame(animate);
