@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState, useRef, useEffect } from "react";
-import type { ReactNode } from "react";
 import {
   FiArrowRight,
   FiBell,
@@ -14,10 +13,9 @@ import {
   FiFile,
   FiImage,
   FiLink,
-  FiMoreHorizontal,
+  FiMoreVertical,
   FiPaperclip,
   FiPhone,
-  FiPlus,
   FiSearch,
   FiSend,
   FiSmile,
@@ -146,21 +144,15 @@ const initialMessages: Message[] = [
 
 function getEnglishTime() {
   const now = new Date();
-  const hour = String(now.getHours()).padStart(2, "0");
-  const minute = String(now.getMinutes()).padStart(2, "0");
-  return `${hour}:${minute}`;
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 }
 
-export default function ConversationPage() {
-  const params = useParams<{ conversationId?: string }>();
-
-  const conversationId = String(params?.conversationId ?? "armin")
-    .toLowerCase()
-    .replace("@", "");
-
+export default function ChatConversationPage() {
+  const params = useParams();
+  const conversationId = String(params?.username ?? "armin").toLowerCase();
   const user = users[conversationId] ?? users.armin;
-  const [notifications, setNotifications] = useState(true);
 
+  const [notifications, setNotifications] = useState(true);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [message, setMessage] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -175,9 +167,7 @@ export default function ConversationPage() {
   }, [messages]);
 
   const filteredMessages = useMemo(() => {
-    if (!search.trim()) {
-      return messages;
-    }
+    if (!search.trim()) return messages;
     const query = search.trim().toLowerCase();
     return messages.filter((item) => item.text?.toLowerCase().includes(query));
   }, [messages, search]);
@@ -199,29 +189,25 @@ export default function ConversationPage() {
   };
 
   return (
-    <div dir="rtl" className="flex h-screen flex-col bg-background text-foreground">
+    <div className="relative flex h-full flex-col bg-background text-foreground">
       <header className="shrink-0 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
         <div className="flex h-16 items-center gap-3 px-3 sm:px-5">
-          <Link
-            href="/chat"
-            aria-label="بازگشت"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:border-primary hover:text-primary transition-colors"
-          >
+          <Link href="/chat" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:border-primary hover:text-primary transition-colors">
             <FiArrowRight size={18} />
           </Link>
 
-          <Link href={`/profile/${user.username.replace("@", "")}`} className="relative shrink-0">
+          <div className="relative shrink-0">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">{user.avatar}</div>
             {user.online && <span className="absolute bottom-0 left-0 h-3 w-3 rounded-full border-2 border-background bg-emerald-500" />}
-          </Link>
+          </div>
 
-          <Link href={`/profile/${user.username.replace("@", "")}`} className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <h2 className="truncate text-sm font-bold text-foreground">{user.name}</h2>
               {user.verified && <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-black text-white">✓</span>}
             </div>
             <p className={`mt-0.5 truncate text-[10px] ${user.online ? "text-emerald-500" : "text-muted"}`}>{user.status}</p>
-          </Link>
+          </div>
 
           <div className="flex items-center gap-0.5">
             <button
@@ -231,30 +217,20 @@ export default function ConversationPage() {
                 setMenuOpen(false);
               }}
               className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${searchOpen ? "bg-primary/10 text-primary" : "text-muted hover:bg-surface-hover hover:text-primary"}`}
-              aria-label="جستجوی پیام"
             >
               <FiSearch size={17} />
             </button>
             <button
               type="button"
               onClick={() => setNotifications((value) => !value)}
-              aria-label="اعلان‌ها"
               className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${notifications ? "text-primary hover:bg-primary/10" : "text-muted hover:bg-surface-hover"}`}
             >
               {notifications ? <FiBell size={17} /> : <FiBellOff size={17} />}
             </button>
-            <button
-              type="button"
-              className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-surface-hover hover:text-primary transition-colors"
-              aria-label="تماس صوتی"
-            >
+            <button type="button" className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-surface-hover hover:text-primary transition-colors">
               <FiPhone size={17} />
             </button>
-            <button
-              type="button"
-              className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-surface-hover hover:text-primary transition-colors"
-              aria-label="تماس تصویری"
-            >
+            <button type="button" className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-surface-hover hover:text-primary transition-colors">
               <FiVideo size={17} />
             </button>
             <button
@@ -264,9 +240,8 @@ export default function ConversationPage() {
                 setSearchOpen(false);
               }}
               className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${menuOpen ? "bg-primary/10 text-primary" : "text-muted hover:bg-surface-hover hover:text-primary"}`}
-              aria-label="بیشتر"
             >
-              <FiMoreHorizontal size={18} />
+              <FiMoreVertical size={18} />
             </button>
           </div>
         </div>
@@ -279,12 +254,12 @@ export default function ConversationPage() {
                 autoFocus
                 type="text"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="جستجو در پیام‌ها..."
-                className="w-full h-9 rounded-lg border border-border bg-background-secondary pr-9 pl-8 text-xs text-foreground outline-none focus:border-primary transition-colors"
+                className="w-full h-9 rounded-lg border border-border bg-background-secondary pr-9 pl-8 text-xs outline-none focus:border-primary transition-colors"
               />
               {search && (
-                <button type="button" onClick={() => setSearch("")} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted hover:text-foreground" aria-label="پاک کردن جستجو">
+                <button type="button" onClick={() => setSearch("")} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted hover:text-foreground">
                   <FiX size={14} />
                 </button>
               )}
@@ -294,7 +269,7 @@ export default function ConversationPage() {
 
         {menuOpen && (
           <>
-            <button type="button" aria-label="بستن منو" onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 cursor-default" />
+            <button type="button" onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 cursor-default" />
             <div className="absolute left-3 top-14 z-50 w-52 overflow-hidden rounded-xl border border-border bg-surface py-1 shadow-xl">
               <Link
                 href={`/profile/${user.username.replace("@", "")}`}
@@ -329,17 +304,12 @@ export default function ConversationPage() {
       </header>
 
       <div className="flex-1 overflow-y-auto bg-background-secondary/30 px-3 py-4 sm:px-5">
-        <div className="pointer-events-none absolute inset-0 opacity-40">
-          <div className="absolute -right-32 top-20 h-80 w-80 rounded-full bg-primary/5 blur-[120px]" />
-          <div className="absolute -left-32 bottom-20 h-80 w-80 rounded-full bg-primary/5 blur-[120px]" />
-        </div>
-
-        <div className="relative mx-auto max-w-3xl">
+        <div className="relative mx-auto max-w-3xl h-full flex flex-col">
           <div className="mb-4 text-center">
             <span className="rounded-full border border-border bg-surface/80 px-3 py-1 text-[9px] font-medium text-muted backdrop-blur-md">امروز</span>
           </div>
 
-          <div className="space-y-2">
+          <div className="flex-1 space-y-2">
             {filteredMessages.map((item) => (
               <MessageBubble key={item.id} message={item} />
             ))}
@@ -364,7 +334,6 @@ export default function ConversationPage() {
             <AttachmentButton icon={<FiImage size={16} />} title="تصویر" />
             <AttachmentButton icon={<FiFile size={16} />} title="فایل" />
             <AttachmentButton icon={<FiLink size={16} />} title="لینک" />
-            <AttachmentButton icon={<FiPlus size={16} />} title="بیشتر" />
           </div>
         )}
 
@@ -372,45 +341,41 @@ export default function ConversationPage() {
           <button
             type="button"
             onClick={() => setAttachmentOpen((current) => !current)}
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${
-              attachmentOpen ? "bg-primary/10 text-primary" : "border border-border bg-surface/50 text-muted hover:border-primary hover:text-primary"
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition-all duration-300 ${
+              attachmentOpen ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface/50 text-muted hover:border-primary hover:bg-primary/10 hover:text-primary"
             }`}
-            aria-label="پیوست"
           >
-            <FiPaperclip size={16} />
+            <FiPaperclip size={20} />
           </button>
 
-          <div className="relative flex-1 min-h-10 rounded-xl border border-border bg-surface/60 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-            <textarea
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  sendMessage();
-                }
-              }}
-              rows={1}
-              placeholder="پیامت را بنویس..."
-              className="w-full min-h-10 max-h-32 resize-none bg-transparent px-3 py-2.5 pl-9 text-sm leading-5 text-foreground outline-none placeholder:text-muted"
-            />
-            <button
-              type="button"
-              className="absolute bottom-1.5 left-1.5 flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-primary/10 hover:text-primary transition-colors"
-              aria-label="ایموجی"
-            >
-              <FiSmile size={16} />
-            </button>
+          <div className="relative flex-1">
+            <div className="flex items-center rounded-2xl border border-border bg-surface/50 transition-all duration-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                rows={1}
+                placeholder="پیامت را بنویس..."
+                className="flex-1 min-h-12 max-h-32 resize-none bg-transparent px-4 py-2 text-sm leading-5 text-foreground placeholder:text-muted outline-none"
+              />
+              <button type="button" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted transition-all duration-300 hover:bg-primary/10 hover:text-primary mx-1">
+                <FiSmile size={20} />
+              </button>
+            </div>
           </div>
 
           <button
             type="button"
             onClick={sendMessage}
             disabled={!message.trim()}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            aria-label="ارسال پیام"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-white transition-all duration-300 hover:bg-primary/90 hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
-            <FiSend size={16} />
+            <FiSend size={20} />
           </button>
         </div>
       </footer>
@@ -432,7 +397,6 @@ function MessageBubble({ message }: { message: Message }) {
               <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${isMe ? "bg-white/10" : "bg-primary/10 text-primary"}`}>
                 <FiFile size={14} />
               </div>
-
               <div className="min-w-0">
                 <p className="truncate text-xs font-medium">{message.file.name}</p>
                 <p className={`mt-0.5 text-[9px] ${isMe ? "text-white/70" : "text-muted"}`}>{message.file.size}</p>
@@ -480,7 +444,7 @@ function LinkifiedText({ text }: { text: string }) {
   );
 }
 
-function AttachmentButton({ icon, title }: { icon: ReactNode; title: string }) {
+function AttachmentButton({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
     <button
       type="button"

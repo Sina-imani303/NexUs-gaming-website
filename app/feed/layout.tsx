@@ -1,14 +1,10 @@
-// app/feed/layout.tsx
-
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { FiHome, FiPlus, FiSearch, FiUser, FiMessageCircle, FiMenu } from "react-icons/fi";
+import { FiPlus, FiSearch, FiMenu } from "react-icons/fi";
+import BottomNav from "../compopnent/BottomNav";
 
 export default function FeedLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
@@ -37,22 +33,7 @@ export default function FeedLayout({ children }: { children: React.ReactNode }) 
 
       <main className="w-full">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl">
-        <div className="flex h-16 items-center justify-around w-full">
-          <Link href="/feed" className={`flex flex-col items-center gap-0.5 text-xs transition ${pathname === "/feed" ? "text-primary" : "text-muted hover:text-primary"}`}>
-            <FiHome size={24} />
-            <span>خانه</span>
-          </Link>
-          <Link href="/chat" className={`flex flex-col items-center gap-0.5 text-xs transition ${pathname?.startsWith("/chat") ? "text-primary" : "text-muted hover:text-primary"}`}>
-            <FiMessageCircle size={24} />
-            <span>پیام‌ها</span>
-          </Link>
-          <Link href="/profile" className={`flex flex-col items-center gap-0.5 text-xs transition ${pathname === "/profile" ? "text-primary" : "text-muted hover:text-primary"}`}>
-            <FiUser size={24} />
-            <span>پروفایل</span>
-          </Link>
-        </div>
-      </nav>
+      <BottomNav />
     </div>
   );
 }

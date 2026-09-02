@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { FiBell, FiHash, FiMenu, FiMessageCircle, FiMoreVertical, FiSearch, FiSun, FiMoon, FiUsers } from "react-icons/fi";
+import { FiBell, FiHash, FiMessageCircle, FiSearch, FiUsers } from "react-icons/fi";
+import BottomNav from "../compopnent/BottomNav";
 
 type Tab = "chats" | "groups" | "channels";
 
@@ -158,27 +159,6 @@ export default function CommunicationLayout({ children }: { children: React.Reac
     return "chats";
   });
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      return document.documentElement.classList.contains("dark");
-    }
-    return true;
-  });
-
-  const toggleTheme = () => {
-    const newIsDark = !isDark;
-    setIsDark(newIsDark);
-    if (newIsDark) {
-      document.documentElement.classList.add("dark");
-      document.documentElement.classList.remove("light");
-    } else {
-      document.documentElement.classList.add("light");
-      document.documentElement.classList.remove("dark");
-    }
-    setMenuOpen(false);
-  };
-
   const filteredConversations = useMemo(() => {
     if (activeTab === "chats") {
       return conversations.filter((c) => c.type === "private");
@@ -207,88 +187,14 @@ export default function CommunicationLayout({ children }: { children: React.Reac
     }
   };
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const isChatPage = pathname?.startsWith("/chat/") || pathname?.startsWith("/group/") || pathname?.startsWith("/channel/");
 
   return (
     <div dir="rtl" className="h-screen overflow-hidden bg-background text-foreground">
       <div className="flex h-full w-full">
-        <aside
-          className={`flex h-full w-full flex-col border-l border-border bg-background ${
-            isMobile && pathname !== "/chat" && pathname !== "/group" && pathname !== "/channel" ? "hidden" : "flex"
-          } sm:flex max-w-100`}
-        >
+        <aside className={`flex h-full w-full flex-col border-l border-border bg-background ${isChatPage ? "hidden lg:flex" : "flex"} lg:max-w-100 pb-20`}>
           <header className="shrink-0 border-b border-border px-4 pb-4 pt-5 sm:px-5">
-            {/* حالت موبایل */}
-            <div className="flex items-center justify-between gap-3 sm:hidden">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen((value) => !value)}
-                  aria-label="منوی بیشتر"
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl border bg-surface/80 shadow-lg backdrop-blur-xl transition-all duration-300 ${
-                    menuOpen ? "border-primary bg-primary/10 text-primary" : "border-border text-muted hover:border-primary hover:bg-primary/10 hover:text-primary"
-                  }`}
-                >
-                  <FiMoreVertical size={20} />
-                </button>
-
-                {menuOpen && (
-                  <>
-                    <button type="button" aria-label="بستن منو" onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 cursor-default" />
-
-                    <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-2xl border border-border bg-surface/95 p-1.5 shadow-2xl backdrop-blur-2xl">
-                      <button
-                        type="button"
-                        onClick={toggleTheme}
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground transition hover:bg-surface-hover hover:text-primary"
-                      >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">{isDark ? <FiSun size={16} /> : <FiMoon size={16} />}</div>
-                        <span className="flex-1 text-right">{isDark ? "حالت لایت" : "حالت دارک"}</span>
-                      </button>
-
-                      <div className="my-1 h-px bg-border" />
-
-                      <Link
-                        href="/group/create"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground transition hover:bg-surface-hover hover:text-primary"
-                      >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                          <FiUsers size={16} />
-                        </div>
-                        <span className="flex-1 text-right">ایجاد گروه</span>
-                      </Link>
-
-                      <Link
-                        href="/channel/create"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground transition hover:bg-surface-hover hover:text-primary"
-                      >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                          <FiHash size={16} />
-                        </div>
-                        <span className="flex-1 text-right">ایجاد کانال</span>
-                      </Link>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <Link href="/" className="text-2xl font-black tracking-[4px] text-primary">
-                NΞXUS
-              </Link>
-
-              <Link
-                href="/dashboard"
-                aria-label="داشبورد"
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface/80 text-muted shadow-lg backdrop-blur-xl transition-all duration-300 hover:border-primary hover:bg-primary/10 hover:text-primary"
-              >
-                <FiMenu size={21} />
-              </Link>
-            </div>
-
-            {/* حالت دسکتاپ و تبلت */}
-            <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-3">
+            <div className="flex items-center justify-between gap-3">
               <Link href="/" className="text-2xl font-black tracking-[4px] text-primary">
                 NΞXUS
               </Link>
@@ -311,7 +217,7 @@ export default function CommunicationLayout({ children }: { children: React.Reac
               />
             </div>
 
-            <div className="mt-4 hidden grid-cols-3 gap-1 rounded-2xl bg-background-secondary/70 p-1 sm:grid">
+            <div className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-background-secondary/70 p-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const active = activeTab === tab.id;
@@ -374,30 +280,10 @@ export default function CommunicationLayout({ children }: { children: React.Reac
             )}
           </div>
 
-          <nav className="block shrink-0 border-t border-border bg-background/95 p-2 backdrop-blur-2xl sm:hidden">
-            <div className="grid grid-cols-3 gap-1 rounded-2xl bg-surface/60 p-1">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                const active = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-all ${
-                      active ? "bg-primary text-background shadow-sm" : "text-muted hover:text-foreground"
-                    }`}
-                  >
-                    <Icon size={18} />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
+          <BottomNav />
         </aside>
 
-        <main className="flex-1 overflow-hidden">{children}</main>
+        <main className={`flex-1 overflow-hidden ${isChatPage ? "block w-full" : "hidden lg:block"}`}>{children}</main>
       </div>
     </div>
   );
