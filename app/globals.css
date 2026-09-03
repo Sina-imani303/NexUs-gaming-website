@@ -1,29 +1,84 @@
 @import "tailwindcss";
 
+@layer base {
+  :root {
+    --background: 247 245 240;
+    --background-secondary: 241 238 231;
+
+    --foreground: 28 27 24;
+    --foreground-secondary: 76 74 68;
+
+    --surface: 255 253 248;
+    --surface-hover: 244 241 234;
+
+    --border: 225 220 210;
+    --border-hover: 205 198 184;
+
+    --muted: 125 121 112;
+
+    --primary: 212 175 55;
+    --primary-hover: 192 155 35;
+    --primary-active: 170 135 20;
+
+    --success: 34 197 94;
+    --error: 239 68 68;
+    --warning: 234 179 8;
+    --info: 59 130 246;
+
+    --xp: 139 92 246;
+    --like: 255 77 109;
+  }
+
+  .dark {
+    --background: 10 10 10;
+    --background-secondary: 15 15 18;
+    --foreground: 245 245 245;
+    --foreground-secondary: 210 212 219;
+    --surface: 30 30 30;
+    --surface-hover: 40 40 40;
+    --border: 40 40 40;
+    --border-hover: 64 69 82;
+    --muted: 150 150 150;
+    --primary: 212 175 55;
+    --primary-hover: 192 155 35;
+    --primary-active: 170 135 20;
+    --success: 34 197 94;
+    --error: 239 68 68;
+    --warning: 234 179 8;
+    --info: 59 130 246;
+    --xp: 139 92 246;
+    --like: 255 77 109;
+  }
+}
+
 @theme {
-  --color-primary: #e7b23b;
-  --color-primary-hover: #f4ca68;
-  --color-primary-active: #c48a10;
+  --font-vazir: "Vazir", sans-serif;
 
-  --color-background: #050506;
-  --color-background-secondary: #0b0c10;
-  --color-surface: #17191f;
-  --color-surface-hover: #23262e;
+  --color-primary: rgb(var(--primary));
+  --color-primary-hover: rgb(var(--primary-hover));
+  --color-primary-active: rgb(var(--primary-active));
 
-  --color-foreground: #ffffff;
-  --color-foreground-secondary: #d9dce5;
-  --color-muted: #9aa1b2;
+  --color-background: rgb(var(--background));
+  --color-background-secondary: rgb(var(--background-secondary));
 
-  --color-border: #323541;
-  --color-border-hover: #4a4f5d;
+  --color-surface: rgb(var(--surface));
+  --color-surface-hover: rgb(var(--surface-hover));
 
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #f43f5e;
-  --color-info: #3b82f6;
+  --color-foreground: rgb(var(--foreground));
+  --color-foreground-secondary: rgb(var(--foreground-secondary));
 
-  --color-xp: #8b5cf6;
-  --color-like: #ff4d6d;
+  --color-muted: rgb(var(--muted));
+
+  --color-border: rgb(var(--border));
+  --color-border-hover: rgb(var(--border-hover));
+
+  --color-success: rgb(var(--success));
+  --color-warning: rgb(var(--warning));
+  --color-error: rgb(var(--error));
+  --color-info: rgb(var(--info));
+
+  --color-xp: rgb(var(--xp));
+  --color-like: rgb(var(--like));
 }
 
 @font-face {
@@ -58,50 +113,24 @@
   font-display: swap;
 }
 
-@theme {
-  --font-vazir: "Vazir", sans-serif;
-
-  --color-primary: #f5c451;
-  --color-primary-hover: #ffd978;
-  --color-primary-active: #d89d12;
-
-  --color-background: #030303;
-  --color-background-secondary: #0d0d0f;
-
-  --color-surface: #16171b;
-  --color-surface-hover: #1f2025;
-
-  --color-foreground: #ffffff;
-  --color-foreground-secondary: #d2d4db;
-  --color-muted: #8e94a3;
-
-  --color-border: #262830;
-  --color-border-hover: #404552;
-
-  --color-success: #2dd36f;
-  --color-warning: #ffb800;
-  --color-error: #ff4d67;
-  --color-info: #4da3ff;
-
-  --color-xp: #8b5cf6;
-  --color-like: #ff3b5c;
-}
-
 html {
   direction: rtl;
 }
 
 html,
 body {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
-  min-height: 100%;
+  overflow-x: hidden !important;
   font-family: "Vazir", sans-serif;
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
+  background: rgb(var(--background));
+  color: rgb(var(--foreground));
 }
 
 button,
@@ -111,9 +140,13 @@ select {
   font-family: inherit;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 ::selection {
-  background: var(--color-primary);
-  color: var(--color-background);
+  background: rgb(var(--primary));
+  color: rgb(var(--background));
 }
 
 ::-webkit-scrollbar {
@@ -121,28 +154,14 @@ select {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-background);
+  background: rgb(var(--background));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: rgb(var(--border));
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary);
-}
-html,
-body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden !important;
-}
-
-body {
-  margin: 0;
-}
-
-* {
-  box-sizing: border-box;
+  background: rgb(var(--primary));
 }
