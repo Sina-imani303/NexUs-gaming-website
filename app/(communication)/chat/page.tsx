@@ -1,30 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiHash, FiMenu, FiMessageCircle, FiMoon, FiSun, FiUserPlus, FiMoreVertical } from "react-icons/fi";
 
 export default function ChatPage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isLight, setIsLight] = useState(false);
+  const [isLight, setIsLight] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("theme") === "light";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+
+    if (isLight) {
+      root.classList.add("light");
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    } else {
+      root.classList.add("dark");
+      root.classList.remove("light");
+      localStorage.setItem("theme", "dark");
+    }
+  }, [isLight]);
 
   const toggleTheme = () => {
-    const nextIsLight = !isLight;
-
-    setIsLight(nextIsLight);
-    localStorage.setItem("nexus-theme", nextIsLight ? "light" : "dark");
-
-    if (nextIsLight) {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.classList.add("light");
-    } else {
-      document.documentElement.classList.remove("light");
-      document.documentElement.classList.add("dark");
-    }
-
-    setMenuOpen(false);
+    setIsLight((current) => !current);
   };
-
   return (
     <main dir="rtl" className="relative h-screen overflow-hidden bg-background text-foreground">
       <div className="pointer-events-none absolute -left-48 -top-48 h-125 w-125 rounded-full bg-primary/10 blur-[160px]" />

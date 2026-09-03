@@ -2,29 +2,43 @@
 
 @layer base {
   :root {
-    --background: 247 245 240;
-    --background-secondary: 241 238 231;
-
-    --foreground: 28 27 24;
-    --foreground-secondary: 76 74 68;
-
-    --surface: 255 253 248;
-    --surface-hover: 244 241 234;
-
-    --border: 225 220 210;
-    --border-hover: 205 198 184;
-
-    --muted: 125 121 112;
-
+    --background: 10 10 10;
+    --background-secondary: 15 15 18;
+    --foreground: 245 245 245;
+    --foreground-secondary: 210 212 219;
+    --surface: 30 30 30;
+    --surface-hover: 40 40 40;
+    --border: 40 40 40;
+    --border-hover: 64 69 82;
+    --muted: 150 150 150;
     --primary: 212 175 55;
     --primary-hover: 192 155 35;
     --primary-active: 170 135 20;
-
     --success: 34 197 94;
     --error: 239 68 68;
     --warning: 234 179 8;
     --info: 59 130 246;
+    --xp: 139 92 246;
+    --like: 255 77 109;
+  }
 
+  .light {
+    --background: 247 245 240;
+    --background-secondary: 241 238 231;
+    --foreground: 28 27 24;
+    --foreground-secondary: 76 74 68;
+    --surface: 255 253 248;
+    --surface-hover: 244 241 234;
+    --border: 225 220 210;
+    --border-hover: 205 198 184;
+    --muted: 125 121 112;
+    --primary: 212 175 55;
+    --primary-hover: 192 155 35;
+    --primary-active: 170 135 20;
+    --success: 34 197 94;
+    --error: 239 68 68;
+    --warning: 234 179 8;
+    --info: 59 130 246;
     --xp: 139 92 246;
     --like: 255 77 109;
   }
