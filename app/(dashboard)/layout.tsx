@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { FiBell, FiChevronLeft, FiGrid, FiHeadphones, FiHome, FiLogOut, FiMenu, FiPlay, FiSettings, FiUser, FiUsers, FiX } from "react-icons/fi";
+import BottomNav from "../compopnent/BottomNav";
 
 const navigation = [
   {
@@ -297,6 +298,7 @@ export default function DashboardLayout({
       <main className="relative z-10 min-h-screen lg:mr-64 xl:mr-72">
         <div className="pt-16 lg:pt-0">{children}</div>
       </main>
+      <BottomNav />
     </div>
   );
 }
