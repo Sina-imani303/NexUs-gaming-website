@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { FiBell, FiHash, FiMessageCircle, FiSearch, FiUsers } from "react-icons/fi";
+import { useEffect, useMemo, useState } from "react";
+import { FiBell, FiHash, FiMessageCircle, FiMoreVertical, FiMoon, FiSearch, FiSun, FiUserPlus, FiUsers } from "react-icons/fi";
 import BottomNav from "../compopnent/BottomNav";
 
 type Tab = "chats" | "groups" | "channels";
@@ -153,19 +153,52 @@ export default function CommunicationLayout({ children }: { children: React.Reac
     if (pathname?.startsWith("/group")) {
       return "groups";
     }
+
     if (pathname?.startsWith("/channel")) {
       return "channels";
     }
+
     return "chats";
   });
+
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const [isLight, setIsLight] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return localStorage.getItem("theme") === "light";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+
+    if (isLight) {
+      root.classList.add("light");
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    } else {
+      root.classList.add("dark");
+      root.classList.remove("light");
+      localStorage.setItem("theme", "dark");
+    }
+  }, [isLight]);
+
+  const toggleTheme = () => {
+    setIsLight((current) => !current);
+    setMenuOpen(false);
+  };
 
   const filteredConversations = useMemo(() => {
     if (activeTab === "chats") {
       return conversations.filter((c) => c.type === "private");
     }
+
     if (activeTab === "groups") {
       return conversations.filter((c) => c.type === "group");
     }
+
     return conversations.filter((c) => c.type === "channel");
   }, [activeTab]);
 
@@ -176,12 +209,18 @@ export default function CommunicationLayout({ children }: { children: React.Reac
       router.push(`/chat/${conversation.id}`);
       return;
     }
+
     const username = conversation.username?.replace(/^@/, "");
-    if (!username) return;
+
+    if (!username) {
+      return;
+    }
+
     if (conversation.type === "group") {
       router.push(`/group/${username}`);
       return;
     }
+
     if (conversation.type === "channel") {
       router.push(`/channel/${username}`);
     }
@@ -199,17 +238,77 @@ export default function CommunicationLayout({ children }: { children: React.Reac
                 NΞXUS
               </Link>
 
-              <Link
-                href="/notifications"
-                className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface/60 text-muted transition hover:border-primary hover:text-primary"
-              >
-                <FiBell size={18} />
-                {unreadTotal > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />}
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/notifications"
+                  className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface/60 text-muted transition hover:border-primary hover:text-primary"
+                >
+                  <FiBell size={18} />
+                  {unreadTotal > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />}
+                </Link>
+
+                <div className="relative lg:hidden">
+                  <button
+                    type="button"
+                    onClick={() => setMenuOpen((value) => !value)}
+                    aria-label="منوی بیشتر"
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl border bg-surface/80 text-muted shadow-lg backdrop-blur-xl transition-all duration-300 ${
+                      menuOpen ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
+                    <FiMoreVertical size={20} />
+                  </button>
+
+                  {menuOpen && (
+                    <>
+                      <button type="button" aria-label="بستن منو" onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 cursor-default" />
+
+                      <div className="absolute left-0 top-12 z-50 w-56 overflow-hidden rounded-2xl border border-border bg-surface/95 p-1.5 shadow-2xl backdrop-blur-2xl">
+                        <button
+                          type="button"
+                          onClick={toggleTheme}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground transition hover:bg-surface-hover hover:text-primary"
+                        >
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">{isLight ? <FiMoon size={16} /> : <FiSun size={16} />}</div>
+
+                          <span className="flex-1 text-right">{isLight ? "حالت دارک" : "حالت لایت"}</span>
+                        </button>
+
+                        <div className="my-1 h-px bg-border" />
+
+                        <Link
+                          href="/group/create"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground transition hover:bg-surface-hover hover:text-primary"
+                        >
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <FiUserPlus size={16} />
+                          </div>
+
+                          <span className="flex-1 text-right">ایجاد گروه</span>
+                        </Link>
+
+                        <Link
+                          href="/channel/create"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground transition hover:bg-surface-hover hover:text-primary"
+                        >
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <FiHash size={16} />
+                          </div>
+
+                          <span className="flex-1 text-right">ایجاد کانال</span>
+                        </Link>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="relative mt-5">
               <FiSearch size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted" />
+
               <input
                 type="text"
                 placeholder="جستجوی گفتگو یا کاربر..."
@@ -221,6 +320,7 @@ export default function CommunicationLayout({ children }: { children: React.Reac
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const active = activeTab === tab.id;
+
                 return (
                   <button
                     key={tab.id}
@@ -249,16 +349,21 @@ export default function CommunicationLayout({ children }: { children: React.Reac
                     className="group flex w-full items-center gap-3 rounded-2xl p-3 text-right transition-all hover:bg-surface-hover active:scale-[0.99]"
                   >
                     <ConversationAvatar conversation={conversation} />
+
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex min-w-0 items-center gap-1.5">
                           <h2 className="truncate text-sm font-bold text-foreground">{conversation.name}</h2>
+
                           {conversation.verified && <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success text-[9px] font-black text-white">✓</span>}
                         </div>
+
                         <span className="shrink-0 text-[10px] text-muted">{conversation.time}</span>
                       </div>
+
                       <div className="mt-1 flex items-center gap-2">
                         <p className="min-w-0 flex-1 truncate text-xs text-muted">{conversation.message}</p>
+
                         {conversation.unread > 0 && (
                           <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[9px] font-black text-background">
                             {conversation.unread > 99 ? "99+" : conversation.unread}
@@ -274,7 +379,9 @@ export default function CommunicationLayout({ children }: { children: React.Reac
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <FiSearch size={22} />
                 </div>
+
                 <h2 className="mt-4 font-bold text-foreground">چیزی پیدا نشد</h2>
+
                 <p className="mt-2 text-xs leading-6 text-muted">هنوز گفتگویی در این بخش وجود ندارد.</p>
               </div>
             )}
@@ -296,6 +403,7 @@ function ConversationAvatar({ conversation }: { conversation: Conversation }) {
         <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br ${conversation.color} text-base font-black text-primary`}>
           {conversation.name.charAt(0).toUpperCase()}
         </div>
+
         {conversation.online && <span className="absolute bottom-0 left-0 h-3.5 w-3.5 rounded-full border-2 border-background bg-success" />}
       </div>
     );
