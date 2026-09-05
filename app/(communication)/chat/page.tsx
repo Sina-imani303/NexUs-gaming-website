@@ -110,8 +110,6 @@ export default function ChatPage() {
 
           <h1 className="mt-2 text-3xl font-black text-foreground sm:text-4xl">به NΞXUS خوش آمدی</h1>
 
-          <p className="mx-auto mt-5 max-w-lg text-sm leading-8 text-muted sm:text-base">یک گفتگو را از لیست انتخاب کن یا برای پیدا کردن کاربر موردنظر از جستجو استفاده کن.</p>
-
           <div className="mx-auto mt-8 flex items-center justify-center gap-2">
             <span className="h-1 w-1 rounded-full bg-primary" />
             <span className="h-1 w-8 rounded-full bg-primary/30" />
